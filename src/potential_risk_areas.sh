@@ -1,6 +1,7 @@
 # ---------------------
 # VARIABLE DEFINITION
 # ---------------------
+
 MONTH=10
 YEAR=2020
 
@@ -22,8 +23,7 @@ BGP=${BGP_MAP}@${DISEASE_MAPSET}
 
 # ---- Covariates
 # - CLMS: water bodies
-# Note: two mapsets depending on timestamp
-# TODO
+# TODO: two mapsets depending on timestamp
 WB_MAP=c_gls_WB300_GLOBE_S2_V2.0.1_MR_WB_res_${YEAR}_${MONTH}_01T00_00_00
 WB_MAPSET=CLMS_water_bodies_from2020_Mauritania
 WB=${WB_MAP}@${WB_MAPSET}
@@ -77,14 +77,30 @@ v.db.renamecolumn map=${SPECIES_MAP} column=species,animal_species
 g.copy vector=${BGP},${BGP_MAP}
 v.db.renamecolumn map=${BGP_MAP} column=species,animal_species
 
-
 # generate SWD files for Maxent
 v.maxent.swd species=${SPECIES_MAP} bgp=${BGP_MAP} evp_maps=${PREC_CURR},${PREC_1M},${PREC_2M},${LST_D},${LST_N},${NDVI},${NDWI},${SM} evp_cat=${WB_RENAME} alias_cat=wb species_output=${SPECIES_OUTPUT} bgr_output=${BGR_OUTPUT}
 
 # train model
 OUT_MODEL=${OUT_PATH_MODEL}/model_${MONTH}_${YEAR}
 mkdir ${OUT_MODEL}
-r.maxent.train -y -b -g samplesfile=${SPECIES_OUTPUT} environmentallayersfile=${BGR_OUTPUT} togglelayertype=wb samplepredictions=model_${MONTH}_${YEAR}_samplepred backgroundpredictions=model_${MONTH}_${YEAR}_bgrdpred outputdirectory=${OUT_MODEL}
+r.maxent.train -y -b -g \
+    samplesfile=${SPECIES_OUTPUT} \
+    environmentallayersfile=${BGR_OUTPUT} \
+    togglelayertype=wb \
+    samplepredictions=model_${MONTH}_${YEAR}_samplepred \
+    backgroundpredictions=model_${MONTH}_${YEAR}_bgrdpred \
+    outputdirectory=${OUT_MODEL}
+# with seperate test data + jackknife validation
+OUT_MODEL_TESTDATA=${OUT_PATH_MODEL}/model_${MONTH}_${YEAR}_with_testdata
+mkdir ${OUT_MODEL_TESTDATA}
+r.maxent.train -y -b -g -j\
+    samplesfile=${SPECIES_OUTPUT} \
+    environmentallayersfile=${BGR_OUTPUT} \
+    togglelayertype=wb \
+    samplepredictions=model_${MONTH}_${YEAR}_samplepred_testdata \
+    backgroundpredictions=model_${MONTH}_${YEAR}_bgrdpred_testdata \
+    outputdirectory=${OUT_MODEL_TESTDATA} \
+    randomtestpoints=15
 
 # apply model
 # TODO: here currently applied to trained data
@@ -93,3 +109,9 @@ r.maxent.predict \
     rasters=${PREC_CURR},${PREC_1M},${PREC_2M},${LST_D},${LST_N},${NDVI},${NDWI},${SM},${WB_RENAME} \
     variables=${PREC_CURR_MAP},${PREC_1M_MAP},${PREC_2M_MAP},${LST_D_MAP},${LST_N_MAP},${NDVI_MAP},${NDWI_MAP},${SM_MAP},wb \
     output=model_${MONTH}_${YEAR}_test_apply
+# 
+r.maxent.predict \
+    lambdafile=${OUT_MODEL_TESTDATA}/${SPECIES_MAP}.lambdas \
+    rasters=${PREC_CURR},${PREC_1M},${PREC_2M},${LST_D},${LST_N},${NDVI},${NDWI},${SM},${WB_RENAME} \
+    variables=${PREC_CURR_MAP},${PREC_1M_MAP},${PREC_2M_MAP},${LST_D_MAP},${LST_N_MAP},${NDVI_MAP},${NDWI_MAP},${SM_MAP},wb \
+    output=model_${MONTH}_${YEAR}_test_apply_testdata
