@@ -30,7 +30,7 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
       - apply model to all monthly data (from 2019-2023)
         - Note: if multiple models (i.e. monhtly models used), has to be done for each of them
     - Creation of binary maps
-      - Define/Compute threshold for creation of binary potential risk maps
+      - TODO: Define/Compute threshold for creation of binary potential risk maps
     - Optional further Analysis
       - Finetune Set of Covariates - Approach:
         - first use all (previous selected) Covariates
