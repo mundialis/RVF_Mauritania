@@ -17,7 +17,7 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
       - AOI/Region Setting
         - use all given positive and negative samples -> AOI defined by them (Covariates only sampled at negative/positive result coordinates)
         - in future following could be further tested/investigated (optional)
-          - only give positive samples -> negative samples will be sampled by MaxEnt tool
+          - only give positive samples -> negative samples will be sampled as background points by MaxEnt tool
             - analyse impact of different region settings (e.g. only area buffered around given positive samples vs. complete Mauretania, ...)
       - Combine all given positive and negative samples
         - Sample Covariates for all given positive and negative results (i.e. create monhtly SWD files) and combine them --> use this as input to train one single model
