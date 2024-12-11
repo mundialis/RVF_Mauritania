@@ -62,8 +62,6 @@ SM=${SM_MAP}@NSIDC_SMAP_soil_moisture_Mauritania
 # PROCESSING
 # ---------------------
 
-# TODO?: 
-# für kleiner region berechnen? nur grob da wo disease daten oder ganz Mauretanien
 g.region raster=aoi_buf_rast@RVF_Mauritania -p
 r.mask raster=aoi_buf_rast@RVF_Mauritania
 
@@ -109,7 +107,7 @@ r.maxent.predict \
     rasters=${PREC_CURR},${PREC_1M},${PREC_2M},${LST_D},${LST_N},${NDVI},${NDWI},${SM},${WB_RENAME} \
     variables=${PREC_CURR_MAP},${PREC_1M_MAP},${PREC_2M_MAP},${LST_D_MAP},${LST_N_MAP},${NDVI_MAP},${NDWI_MAP},${SM_MAP},wb \
     output=model_${MONTH}_${YEAR}_test_apply
-# 
+# for run with separated test data (15% less data)
 r.maxent.predict \
     lambdafile=${OUT_MODEL_TESTDATA}/${SPECIES_MAP}.lambdas \
     rasters=${PREC_CURR},${PREC_1M},${PREC_2M},${LST_D},${LST_N},${NDVI},${NDWI},${SM},${WB_RENAME} \
