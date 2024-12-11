@@ -28,7 +28,6 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
           - train monthly models (for which enough positive (and negative) samples given) + apply to all data + average results
     - Apply Model
       - apply model to all monthly data (from 2019-2023)
-        - Note: if multiple models (i.e. monhtly models used), has to be done for each of them
     - Creation of binary maps
       - TODO: Define/Compute threshold for creation of binary potential risk maps
     - Optional further Analysis
@@ -37,3 +36,4 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
         - then iterative removal of non useful datasets
           - use feature importance e.g. jackknife plots
         - Additional: check features/mathematical transformations (done by Maxent) -> amount, selection, ...
+      - Note: if multiple models (i.e. monhtly models used), has to be done for each of them
