@@ -19,7 +19,7 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
         - in future following could be further tested/investigated (optional)
           - only give positive samples -> negative samples will be sampled as background points by MaxEnt tool
             - analyse impact of different region settings (e.g. only area buffered around given positive samples vs. complete Mauretania, ...)
-      - Combine all given positive and negative samples
+      - Combine all given positive and negative samples from all months/years
         - Sample Covariates for all given positive and negative results (i.e. create monhtly SWD files) and combine them --> use this as input to train one single model
           - TODO:
             - check for balanced dataset -> approx. same number of positive and negative samples
