@@ -1,26 +1,64 @@
 # ---------------------
+# READ CONFIG
+# ---------------------
+
+if [ "$#" -ne 1 ]; then
+    echo -e "ERROR: Missing configfile.\nUsage: main.sh /path/to/config.cfg"
+    exit 1
+fi
+end=$1  
+
+# source config
+CONFFIGFILE=$1
+
+# -- Configuration
+
+# Check and if given source the config
+if [ -f "${CONFFIGFILE}" ]; then
+  source "${CONFFIGFILE}"
+else
+  echo "Required config file ${CONFFIGFILE} does not exist."
+  exit 1
+fi
+
+# check variables
+if [ -z "$STARTDATE" ] ; then
+  echo "ERROR: STARTDATE is not set"
+  exit 1
+fi
+
+if [ -z "$ENDDATE" ] ; then
+  echo "ERROR: ENDDATE is not set"
+  exit 1
+fi
+
+# ---------------------
 # VARIABLE DEFINITION
 # ---------------------
 
-#MONTH=10
-#YEAR=2020
-
-STARTDATE=2024-01-01
-ENDDATE=2019-01-01
+#STARTDATE="2019-01-01"
+#ENDDATE="2023-12-01"
+# for precipitation data 2 months prior are need therefore earliest analysis month March 2019
+STARTDATE=$(date -I -d "$STARTDATE + 1 month")
 DATE_TMP=${STARTDATE}
+
 while [ "$DATE_TMP" != ${ENDDATE} ]; do    
       
-    DATE_TMP=$(date -I -d "$DATE_TMP - 1 month"); 
+    DATE_TMP=$(date -I -d "$DATE_TMP + 1 month"); 
 
     DATE_SPLIT=(${DATE_TMP//-/ })
     MONTH=${DATE_SPLIT[1]}
     YEAR=${DATE_SPLIT[0]}
 
-    #echo $DATE_TMP
-    echo "$YEAR; $MONTH"; 
-
-
-
+    # selection of one and two month prior
+    # - month 1 or 2 prior with datetime or similar (e.g. jan 2020) (not just -1, -2)
+    # - two digits
+    # - special case for jan and feb 2019
+    DATE_1_PRIOR=$(date -I -d "$DATE_TMP - 1 month"); DATE_SPLIT=(${DATE_1_PRIOR//-/ }); 
+    MONTH_1_PRIOR_YEAR=${DATE_SPLIT[0]}; MONTH_1_PRIOR=${DATE_SPLIT[1]}; 
+    DATE_2_PRIOR=$(date -I -d "$DATE_TMP - 2 month"); DATE_SPLIT=(${DATE_2_PRIOR//-/ });
+    MONTH_2_PRIOR_YEAR=${DATE_SPLIT[0]}; MONTH_2_PRIOR=${DATE_SPLIT[1]}; 
+    echo "$DATE_TMP; $MONTH_1_PRIOR_YEAR - $MONTH_1_PRIOR; $MONTH_2_PRIOR_YEAR - $MONTH_2_PRIOR";
 
     # ---- Output (SWD files + Models)
     OUT_PATH=/mnt/projects/mood/RVF_Mauritania/maxent/
@@ -46,17 +84,6 @@ while [ "$DATE_TMP" != ${ENDDATE} ]; do
     WB=${WB_MAP}@${WB_MAPSET}
 
     # current monthly rainfall + one month prior + two month prior
-    # selection of one and two month prior
-    # - month 1 or 2 prior with datetime or similar (e.g. jan 2020) (not just -1, -2)
-    # - two digits
-    # - special case for jan and feb 2019
-    DATE_1_PRIOR=$(date -I -d "$DATE_TMP - 1 month"); 
-    DATE_SPLIT=(${DATE_1_PRIOR//-/ }); MONTH_1_PRIOR_YEAR=${DATE_SPLIT[0]}; MONTH_1_PRIOR=${DATE_SPLIT[1]}; 
-    DATE_2_PRIOR=$(date -I -d "$DATE_TMP - 2 month"); #alternativ: $(date -I -d "$DATE_TMP - 2 month");
-    DATE_SPLIT=(${DATE_2_PRIOR//-/ }); MONTH_2_PRIOR_YEAR=${DATE_SPLIT[0]}; MONTH_2_PRIOR=${DATE_SPLIT[1]}; 
-    echo "$MONTH_1_PRIOR_YEAR - $MONTH_1_PRIOR; $MONTH_2_PRIOR_YEAR - $MONTH_2_PRIOR";
-
-
     PREC_CURR_MAP=ERA5_land_monthly_prectot_sum_30sec_${YEAR}_${MONTH}_01T00_00_00
     PREC_1M_MAP=ERA5_land_monthly_prectot_sum_30sec_${MONTH_1_PRIOR_YEAR}_${MONTH_1_PRIOR}_01T00_00_00
     PREC_2M_MAP=ERA5_land_monthly_prectot_sum_30sec_${MONTH_2_PRIOR_YEAR}_${MONTH_2_PRIOR}_01T00_00_00
@@ -90,41 +117,6 @@ while [ "$DATE_TMP" != ${ENDDATE} ]; do
     g.region raster=aoi_buf_rast@RVF_Mauritania -p
     r.mask raster=aoi_buf_rast@RVF_Mauritania
 
-    # TODO: rename CLMS water bodies data:
-    WB_RENAME=${WB_MAP//./_}
-    g.copy raster=${WB},${WB_RENAME}
-
-    # ? TODO: rename species column
-    g.copy vector=${SPECIES},${SPECIES_MAP}
-    v.db.renamecolumn map=${SPECIES_MAP} column=species,animal_species
-    g.copy vector=${BGP},${BGP_MAP}
-    v.db.renamecolumn map=${BGP_MAP} column=species,animal_species
-
-    # generate SWD files for Maxent
-    v.maxent.swd species=${SPECIES_MAP} bgp=${BGP_MAP} evp_maps=${PREC_CURR},${PREC_1M},${PREC_2M},${LST_D},${LST_N},${NDVI},${NDWI},${SM} evp_cat=${WB_RENAME} alias_cat=wb species_output=${SPECIES_OUTPUT} bgr_output=${BGR_OUTPUT}
-
-    # train model
-    OUT_MODEL=${OUT_PATH_MODEL}/model_${MONTH}_${YEAR}
-    mkdir ${OUT_MODEL}
-    r.maxent.train -y -b -g \
-        samplesfile=${SPECIES_OUTPUT} \
-        environmentallayersfile=${BGR_OUTPUT} \
-        togglelayertype=wb \
-        samplepredictions=model_${MONTH}_${YEAR}_samplepred \
-        backgroundpredictions=model_${MONTH}_${YEAR}_bgrdpred \
-        outputdirectory=${OUT_MODEL}
-    # with seperate test data + jackknife validation
-    OUT_MODEL_TESTDATA=${OUT_PATH_MODEL}/model_${MONTH}_${YEAR}_with_testdata
-    mkdir ${OUT_MODEL_TESTDATA}
-    r.maxent.train -y -b -g -j\
-        samplesfile=${SPECIES_OUTPUT} \
-        environmentallayersfile=${BGR_OUTPUT} \
-        togglelayertype=wb \
-        samplepredictions=model_${MONTH}_${YEAR}_samplepred_testdata \
-        backgroundpredictions=model_${MONTH}_${YEAR}_bgrdpred_testdata \
-        outputdirectory=${OUT_MODEL_TESTDATA} \
-        randomtestpoints=15
-
     # apply model
     # TODO: here currently applied to trained data
     r.maxent.predict \
@@ -138,5 +130,4 @@ while [ "$DATE_TMP" != ${ENDDATE} ]; do
         rasters=${PREC_CURR},${PREC_1M},${PREC_2M},${LST_D},${LST_N},${NDVI},${NDWI},${SM},${WB_RENAME} \
         variables=${PREC_CURR_MAP},${PREC_1M_MAP},${PREC_2M_MAP},${LST_D_MAP},${LST_N_MAP},${NDVI_MAP},${NDWI_MAP},${SM_MAP},wb \
         output=model_${MONTH}_${YEAR}_test_apply_testdata
-
 done
