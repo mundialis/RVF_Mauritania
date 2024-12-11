@@ -25,7 +25,7 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
             - check for balanced dataset -> approx. same number of positive and negative samples
             - compare result with single month trained model (i.e. october 2020 modell)
         - Optional/further ideas:
-          - train monhtly models (for which enough positive (and negative) samples given) + apply to all data + average results
+          - train monthly models (for which enough positive (and negative) samples given) + apply to all data + average results
     - Apply Model
       - apply model to all monthly data (from 2019-2023)
         - Note: if multiple models (i.e. monhtly models used), has to be done for each of them
