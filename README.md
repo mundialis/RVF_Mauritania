@@ -43,4 +43,5 @@ species geographic distributions. Ecological Modelling](https://www.whoi.edu/cms
         - then iterative removal of non useful datasets
           - use feature importance e.g. jackknife plots
         - Additional: check features/mathematical transformations (done by Maxent) -> amount, selection, ...
+          - see parameters from `r.maxent.train`: `lq2lqptthreshold`, `l2lqthreshold`, `hingethreshold`
       - Note: if multiple models (i.e. monhtly models used), has to be done for each of them
