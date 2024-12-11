@@ -12,7 +12,7 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
     - TODO:
       - instead of binary water bodies, use distance to water bodies (e.g. with `r.grow.distance`)
       - neglect/don't use soil moisture
-  - Analyis Procedure:
+  - Analysis Procedure:
     - Train Model:
       - AOI/Region Setting
         - use all given positive and negative samples -> AOI defined by them (Covariates only sampled at negative/positive result coordinates)
