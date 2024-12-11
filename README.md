@@ -30,6 +30,13 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
       - apply model to all monthly data (from 2019-2023)
     - Creation of binary maps
       - TODO: Define/Compute threshold for creation of binary potential risk maps
+        - e.g. check Maxent html-output: Table with Cloglog threshold for various "common threshold" with corresponding omission rate
+          - Explanation to graphs (from tutorial): "This allows the program to do some simple statistical analysis. Much of the analysis used the use of a **threshold to make a binary prediction, with suitable conditions predicted above the threshold and unsuitable below**. The first plot shows how testing and training omission and predicted area vary with the choice of cumulative threshold"
+          - see also paper [Phillips, S.J., R.P. Anderson, and R.E. Schapire. 2006. Maximum entropy modeling of
+species geographic distributions. Ecological Modelling](https://www.whoi.edu/cms/files/phillips_etal_2006_53467.pdf)
+          - Notes:
+            - Omission and Comission Error: Metric for classification results (dependent on TruePositives, FalsePositives, ...)
+            - p-value (only if test data given) -> statistical significance
     - Optional further Analysis
       - Finetune set of covariates - Approach:
         - first use all (previous selected) covariates
