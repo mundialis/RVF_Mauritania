@@ -32,8 +32,8 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
     - Creation of binary maps
       - TODO: Define/Compute threshold for creation of binary potential risk maps
     - Optional further Analysis
-      - Finetune Set of Covariates - Approach:
-        - first use all (previous selected) Covariates
+      - Finetune set of covariates - Approach:
+        - first use all (previous selected) covariates
         - then iterative removal of non useful datasets
           - use feature importance e.g. jackknife plots
         - Additional: check features/mathematical transformations (done by Maxent) -> amount, selection, ...
