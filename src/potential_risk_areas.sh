@@ -67,7 +67,7 @@ SM=${SM_MAP}@NSIDC_SMAP_soil_moisture_Mauritania
 g.region raster=aoi_buf_rast@RVF_Mauritania -p
 r.mask raster=aoi_buf_rast@RVF_Mauritania
 
-# TODO: rename CLMS water bodie data:
+# TODO: rename CLMS water bodies data:
 WB_RENAME=${WB_MAP//./_}
 g.copy raster=${WB},${WB_RENAME}
 
