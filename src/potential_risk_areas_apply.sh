@@ -64,6 +64,8 @@ while [ "$DATE_TMP" != ${STOPDATE} ]; do
 
     # apply model
     # Note: removed soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},
+    # TODO: distance to water bodies in integer and divide by 100 (in data processing script) -> event adpat config (map name)
+    # TODO: name of variables: read from file, OR directly name "better"/generic in SWD file
     r.maxent.predict \
         lambdafile=${OUT_MODEL}/${SPECIES_MAP//MONTH_YEAR/combined}.lambdas \
         rasters=${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\

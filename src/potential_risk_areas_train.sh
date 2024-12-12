@@ -108,5 +108,6 @@ r.maxent.train -g -j \
     environmentallayersfile=${BGR_OUTPUT_COMB} \
     outputdirectory=${OUT_MODEL} --o
     # randomtestpoints=15 
+    # TODO
     # optional (Note: only possibe):
     # flag y and b + option samplepredictions and backgroundpredictions
