@@ -46,6 +46,7 @@ STOPDATE=$(date -I -d "$ENDDATE + 1 month")
 # ---------------------
 
 g.region raster=aoi_buf_rast@RVF_Mauritania -p
+r.mask -r
 r.mask raster=aoi_buf_rast@RVF_Mauritania
 
 while [ "$DATE_TMP" != ${STOPDATE} ]; do    
@@ -62,29 +63,27 @@ while [ "$DATE_TMP" != ${STOPDATE} ]; do
     TMP_YEAR=${DATE_SPLIT[0]}; TMP_MONTH=${DATE_SPLIT[1]}; 
 
     # apply model
-    # TODO: check model output name --> (and if all species data used)
-    # TODO: for testing: only smaller time range (config)
+    # Note: removed soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},
     r.maxent.predict \
-        lambdafile=${OUT_MODEL}/${SPECIES_MAP//MONTH_YEAR/${MONTH}_${YEAR}}.lambdas \
+        lambdafile=${OUT_MODEL}/${SPECIES_MAP//MONTH_YEAR/combined}.lambdas \
         rasters=${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
-          ${PREC_2M//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
-          ${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${NDWI//YEAR_MONTH/${YEAR}_${MONTH}},\
-          # ${SM//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${DIST_TO_WB//YEAR_MONTH/${YEAR}_${MONTH}} \
-        variables=${PREC_CURR_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${PREC_1M_MAP/${OMP_YEAR}_${OMP_MONTH}},\
-          ${PREC_2M_MAP/${TMP_YEAR}_${TMP_MONTH}},\
-          ${LST_D_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${LST_N_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${NDVI_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${NDWI_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-          # ${SM_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-          ${DIST_TO_WB_MAP//YEAR_MONTH/${YEAR}_${MONTH}} \
-        output=model_${MONTH}_${YEAR}
+${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
+${PREC_2M//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
+${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
+${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
+${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
+${NDWI//YEAR_MONTH/${YEAR}_${MONTH}},\
+${DIST_TO_WB//YEAR_MONTH/${YEAR}_${MONTH}} \
+        variables=ERA5_land_monthly_prectot_sum_30sec_2020_01_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2019_12_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2019_11_01T00_00_00,lst_day_monthly_2020_01_1km,lst_night_monthly_2020_01_1km,ndvi_filt_2020_01_01T00_00_00,ndwi_veg_monthly_2020_01_1km,dist_to_wb_2020_01 \
+        output=model_${MONTH}_${YEAR} --o --v
+#         ${PREC_CURR_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
+# ${PREC_1M_MAP//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
+# ${PREC_2M_MAP//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
+# ${LST_D_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
+# ${LST_N_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
+# ${NDVI_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
+# ${NDWI_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
+# ${DIST_TO_WB_MAP//YEAR_MONTH/${YEAR}_${MONTH}} \
     
     # next month: for next iteration
     DATE_TMP=$(date -I -d "$DATE_TMP + 1 month"); 
