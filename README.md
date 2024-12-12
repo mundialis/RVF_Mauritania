@@ -45,3 +45,5 @@ species geographic distributions. Ecological Modelling](https://www.whoi.edu/cms
         - Additional: check features/mathematical transformations (done by Maxent) -> amount, selection, ...
           - see parameters from `r.maxent.train`: `lq2lqptthreshold`, `l2lqthreshold`, `hingethreshold` and flags `l,q,p,t,h,a`
       - Note: if multiple models (i.e. monhtly models used), has to be done for each of them
+### Versions
+- todo: table/or list for `DATE_V` and  `MODEL_V`
