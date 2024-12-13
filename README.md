@@ -45,5 +45,22 @@ species geographic distributions. Ecological Modelling](https://www.whoi.edu/cms
         - Additional: check features/mathematical transformations (done by Maxent) -> amount, selection, ...
           - see parameters from `r.maxent.train`: `lq2lqptthreshold`, `l2lqthreshold`, `hingethreshold` and flags `l,q,p,t,h,a`
       - Note: if multiple models (i.e. monhtly models used), has to be done for each of them
+
 ### Versions
-- todo: table/or list for `DATE_V` and  `MODEL_V`
+
+Data (or rather SWD files) in: `/mnt/projects/mood/RVF_Mauritania/maxent/SWD_files`
+
+| Data version (dv) | Input | Notes |
+| - | - | - |
+|  - | precipitation (current month + 1 month previous + 2 month previous), <br/> lst day and night, <br/> NDVI, <br/> NDWI, <br/> soil moisture, <br/> water bodies (categorical) | not versioned; used for first tests with october 2020 model; <br/>  corresponds to SWD files `bgr_10_2020` and `species_10_2020` |
+| 01 | precipitation (current month + 1 month previous + 2 month previous), <br/> lst day and night, <br/> NDVI, <br/> NDWI, <br/> distance to waterr bodies | |
+| 02 | as 01 but without distance to water bodies | |
+
+Model results in : `/mnt/projects/mood/RVF_Mauritania/maxent/models/`
+
+|Model version | Used data version | Description |
+| - | - | - |
+| - | - | not versioned; first tests with october 2020 model; <br/> results within `model_10_2020` and with test data splitted `model_10_2020_with_testdata`|
+| 01 | 01 | single model with combined disease data |
+| 02 | 01 | monthly models (for each month with at least single positive sample) |
+| 03 | 02 | monhtly model, only for octobre 2020 |
