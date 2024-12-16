@@ -9,9 +9,6 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
 - Analysis
   - Input: prepared Disease Data and Covariates
     - ? TODO: short description of concrete input + how prepared (resmapling, ..)
-    - TODO:
-      - instead of binary water bodies, use distance to water bodies (e.g. with `r.grow.distance`)
-      - neglect/don't use soil moisture
   - Analysis Procedure:
     - Train Model:
       - AOI/Region Setting
@@ -63,6 +60,16 @@ Model results in : `/mnt/projects/mood/RVF_Mauritania/maxent/models/`
 | - | - | not versioned; first tests with october 2020 model; <br/> results within `model_10_2020` and with test data splitted `model_10_2020_with_testdata`| |
 | 01 | 01 | single model with all disease data combined | variable contribution: ca. 70 % impact of current precipitaion |
 | 02 | 01 | monthly models (for each month with at least single positive sample) | very different results when applying model + within variable contribution; mostly precipitation driving factor or model |
-| 03 | 02 | monhtly model, only for octobre 2020 | variable contribution: roughly 40 % for 2 month prior and 40 % for 1 month prior precipitation |
-| 04 | 02 | single model with all disease data combined | variable contribution: ca. 80 % impact of current precipitaion|
-| 05 | 02 | single model with 09/10 2020 and 09/10 2022 data combined (the month with the most positive disease data) | variable contribution: 30 % lst night, 30 % current month precipitation|
+| 03 | 02  <br/> (presence samples: 53, All samples: 187)| monhtly model, only for octobre 2020 | variable contribution: roughly 40 % for 2 month prior and 40 % for 1 month prior precipitation |
+| 04 | 02 <br/> (presence samples: 152, All samples: 752) | single model with all disease data combined | variable contribution: ca. 80 % impact of current precipitaion|
+| 05 | 02 <br/> (presence samples: 132, All samples: 437) | single model with 09/10 2020 and 09/10 2022 data combined (the month with the most positive disease data) | variable contribution: 30 % lst night, 30 % current month precipitation <br/> application results has a lot of round/circle structures with strong borders of change in risk |
+| 06 | 02 <br/> (presence samples: 282, All samples: 820)| as mv04, but keep duplicates during training| less strong impact of current precipitation on model (ca. 45 %), followed by precipitation 1 month prior (20 %) and 2 month prior (14 %) <br/> keeping duplicates during training results in less strong changes in risk (in some month e.g. 05-2020, 06-2020, ... ) compared to mv04 |
+| 07 | 02 <br/> (presence samples: 232, All samples: 487)| as mv05, but keep duplicates during training | precipitation 2 month earlier strongest impact on model (ca. 50 %) <br/> similar strange geometric patterns as in mv05|
+
+
+Notes:
+- when using all data: current month precipitation major driver of model
+- for monthly models it depends (10-2020: seems to deliver "good" results -> 2 month prior precipitation large driver, but not the only driver)
+- keeping duplicates makes difference on model results -> no clear indication if results better/or worse, or rather dependent on model version
+- Best results so far: mv03 or mv06 (but differences between them)
+  - "Best": model is not mainly driven by single Covariate + application to 2020 looks reasonable (no strong risk change "borders", geometric features/artefacts (?), ...) 

@@ -55,7 +55,7 @@ ITER=0
 if [ ${MODEL_V} -eq "03" ]; then
     # loop / use only 10-2020 (model version 03)
     LOOP_VECT_LIST=`g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/10_2020} mapset=${DISEASE_MAPSET}`
-elif [ ${MODEL_V} -eq "05" ]; then
+elif [ ${MODEL_V} -eq "05" ] || [ ${MODEL_V} -eq "07" ]; then
     # loop / use only the 4 month with the most data samples
     LOOP_VECT_LIST=`g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/09_2020},${SPECIES_MAP//MONTH_YEAR/10_2020},${SPECIES_MAP//MONTH_YEAR/09_2022},${SPECIES_MAP//MONTH_YEAR/10_2022} mapset=${DISEASE_MAPSET}`
 else
@@ -97,18 +97,22 @@ for VECT_POS in ${LOOP_VECT_LIST} ; do
         # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},\
         # for dv02:
         # - dist to water bodies: ${DIST_TO_WB//YEAR_MONTH/${YEAR}_${MONTH}} \
-        v.maxent.swd species=${SPECIES//MONTH_YEAR/${MONTH}_${YEAR}} \
-            bgp=${BGP//MONTH_YEAR/${MONTH}_${YEAR}} \
-            evp_maps=${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
+        if [ -f ${SPECIES_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} ]; then
+            echo "${SPECIES_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} already exists, skipping v.maxent.swd step"
+        else
+            v.maxent.swd species=${SPECIES//MONTH_YEAR/${MONTH}_${YEAR}} \
+                bgp=${BGP//MONTH_YEAR/${MONTH}_${YEAR}} \
+                evp_maps=${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
 ${PREC_2M//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
 ${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${NDWI//YEAR_MONTH/${YEAR}_${MONTH}}\
-            alias_names=prec_curr,prec_1m,prec_2m,lst_d,lst_n,ndvi,ndwi \
-            species_output=${SPECIES_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} \
-            bgr_output=${BGR_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} --o
+                alias_names=prec_curr,prec_1m,prec_2m,lst_d,lst_n,ndvi,ndwi \
+                species_output=${SPECIES_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} \
+                bgr_output=${BGR_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} --o
+        fi
 
         # Concat monthly SWD files to single combined and metadata file with corresponding dates
         if [ ${ITER} -eq 1 ]; then
@@ -143,7 +147,9 @@ fi
 
 # train model
 mkdir ${OUT_MODEL} -p
-r.maxent.train -g -j \
+# d flag: keep duplicates
+# n flag: avoid adding more data to background samples --> when set, model seems NOT having enough data for reasonable training
+r.maxent.train -g -j -d \
     samplesfile=${SPECIES_OUTPUT_COMB} \
     environmentallayersfile=${BGR_OUTPUT_COMB} \
     outputdirectory=${OUT_MODEL} --o
