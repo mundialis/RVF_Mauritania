@@ -52,11 +52,18 @@ r.mask raster=aoi_buf_rast@RVF_Mauritania
 # helper variable, for information about loop iteration
 ITER=0
 
-# TODO: 
-# loop over all monthly disease data, where positive samples given to generate monthly SWD files
-for VECT_POS in `g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/"*"} mapset=${DISEASE_MAPSET}`; do
-# loop / use only 10-2020
-# for VECT_POS in `g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/10_2020} mapset=${DISEASE_MAPSET}`; do
+if [ ${MODEL_V} -eq "03" ]; then
+    # loop / use only 10-2020 (model version 03)
+    LOOP_VECT_LIST=`g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/10_2020} mapset=${DISEASE_MAPSET}`
+elif [ ${MODEL_V} -eq "05" ]; then
+    # loop / use only the 4 month with the most data samples
+    LOOP_VECT_LIST=`g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/09_2020},${SPECIES_MAP//MONTH_YEAR/10_2020},${SPECIES_MAP//MONTH_YEAR/09_2022},${SPECIES_MAP//MONTH_YEAR/10_2022} mapset=${DISEASE_MAPSET}`
+else
+    LOOP_VECT_LIST=`g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/"*"} mapset=${DISEASE_MAPSET}`
+fi
+
+# loop over disease data (which month, is specified above), to generate monthly SWD files
+for VECT_POS in ${LOOP_VECT_LIST} ; do
     VECT_NEG=${VECT_POS//POS/NEG}
     # only for positive samples, where also negative samples given
     if [ `g.list vector pattern=${VECT_NEG} mapset=${DISEASE_MAPSET}` ]; then
@@ -88,6 +95,7 @@ for VECT_POS in `g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/"*"} mapset=${D
         # generate SWD files for Maxent
         # removed:
         # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},\
+        # for dv02:
         # - dist to water bodies: ${DIST_TO_WB//YEAR_MONTH/${YEAR}_${MONTH}} \
         v.maxent.swd species=${SPECIES//MONTH_YEAR/${MONTH}_${YEAR}} \
             bgp=${BGP//MONTH_YEAR/${MONTH}_${YEAR}} \
@@ -98,6 +106,7 @@ ${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${NDWI//YEAR_MONTH/${YEAR}_${MONTH}}\
+            alias_names=prec_curr,prec_1m,prec_2m,lst_d,lst_n,ndvi,ndwi \
             species_output=${SPECIES_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} \
             bgr_output=${BGR_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} --o
 

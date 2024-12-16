@@ -87,55 +87,53 @@ while [ "$DATE_TMP" != ${STOPDATE} ]; do
     # apply model
     # Note: removed:
     # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},
-    # - distance to water bodies: ${DIST_TO_WB_MAP//YEAR_MONTH/${YEAR}_${MONTH}} \
-    # TODO: name of variables: read from file, OR directly name "better"/generic in SWD file
+    if [ ${MODEL_V} -eq "01" ] || [ ${MODEL_V} -eq "02" ]; then
+      RASTERS="${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
+${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
+${PREC_2M//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
+${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
+${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
+${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
+${NDWI//YEAR_MONTH/${YEAR}_${MONTH}},\
+${DIST_TO_WB//YEAR_MONTH/${YEAR}_${MONTH}}"
+      VARIABLES=ERA5_land_monthly_prectot_sum_30sec_2020_01_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2019_12_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2019_11_01T00_00_00,lst_day_monthly_2020_01_1km,lst_night_monthly_2020_01_1km,ndvi_filt_2020_01_01T00_00_00,ndwi_veg_monthly_2020_01_1km,dist_to_wb_2020_01_scaled
+    elif [ ${MODEL_V} -eq "03" ]; then
+    RASTERS="${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
+${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
+${PREC_2M//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
+${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
+${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
+${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
+${NDWI//YEAR_MONTH/${YEAR}_${MONTH}},\
+${DIST_TO_WB//YEAR_MONTH/${YEAR}_${MONTH}}"
+      VARIABLES=ERA5_land_monthly_prectot_sum_30sec_2020_10_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2020_09_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2020_08_01T00_00_00,lst_day_monthly_2020_10_1km,lst_night_monthly_2020_10_1km,ndvi_filt_2020_10_01T00_00_00,ndwi_veg_monthly_2020_10_1km
+    else
+      RASTERS="${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
+${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
+${PREC_2M//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
+${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
+${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
+${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
+${NDWI//YEAR_MONTH/${YEAR}_${MONTH}}"
+      VARIABLES=prec_curr,prec_1m,prec_2m,lst_d,lst_n,ndvi,ndwi
+    fi
     if [ ${SING_MOD} -eq 1 ]; then
       r.maxent.predict \
           lambdafile=${OUT_MODEL}/${SPECIES_MAP//MONTH_YEAR/combined}.lambdas \
-          rasters=${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
-${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
-${PREC_2M//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
-${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
-${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
-${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
-${NDWI//YEAR_MONTH/${YEAR}_${MONTH}}\
-          variables=ERA5_land_monthly_prectot_sum_30sec_2020_01_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2019_12_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2019_11_01T00_00_00,lst_day_monthly_2020_01_1km,lst_night_monthly_2020_01_1km,ndvi_filt_2020_01_01T00_00_00,ndwi_veg_monthly_2020_01_1km \
+          rasters=${RASTERS} \
+          variables=${VARIABLES} \
           output=model_${MONTH}_${YEAR}_mv${MODEL_V} --o --v
-          # variables=
-  #         ${PREC_CURR_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-  # ${PREC_1M_MAP//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
-  # ${PREC_2M_MAP//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
-  # ${LST_D_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-  # ${LST_N_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-  # ${NDVI_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-  # ${NDWI_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
     else
-      # TODO: give name of monhtly models, which should be applied (check reasonable models with html output of maxent)
-      #   -> maybe as separate VAR in config?
-      # for MODEL_DATE in "11_2020" "08_2022" "10_2022" "09_2020" "09_2022" "10_2020"; do
-      for MODEL_DATE in "10_2020"; do
-        # Note: removed:
-        # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},
-        # - distance to water bodies: ${DIST_TO_WB_MAP//YEAR_MONTH/${YEAR}_${MONTH}} \
+      # Note: loop over monthly models, which should be applied
+      # (check reasonable models with html output of maxent)
+      # for model version 03:
+      # for MODEL_DATE in "10_2020"; do
+      for MODEL_DATE in "11_2020" "08_2022" "10_2022" "09_2020" "09_2022" "10_2020"; do
         r.maxent.predict \
           lambdafile=${OUT_MODEL}/${SPECIES_MAP//MONTH_YEAR/${MODEL_DATE}}.lambdas \
-          rasters=${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
-${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
-${PREC_2M//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
-${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
-${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
-${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
-${NDWI//YEAR_MONTH/${YEAR}_${MONTH}}\
-          variables=ERA5_land_monthly_prectot_sum_30sec_2020_10_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2020_09_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2020_08_01T00_00_00,lst_day_monthly_2020_10_1km,lst_night_monthly_2020_10_1km,ndvi_filt_2020_10_01T00_00_00,ndwi_veg_monthly_2020_10_1km \
+          rasters=${RASTERS} \
+          variables=${VARIABLES} \
           output=model_${MONTH}_${YEAR}_monthmodel_${MODEL_DATE}_mv${MODEL_V} --o --v
-#         ${PREC_CURR_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-# ${PREC_1M_MAP//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
-# ${PREC_2M_MAP//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
-# ${LST_D_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-# ${LST_N_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-# ${NDVI_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-# ${NDWI_MAP//YEAR_MONTH/${YEAR}_${MONTH}},\
-# ${DIST_TO_WB_MAP//YEAR_MONTH/${YEAR}_${MONTH}} \
       done
     fi
     

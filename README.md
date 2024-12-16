@@ -58,9 +58,11 @@ Data (or rather SWD files) in: `/mnt/projects/mood/RVF_Mauritania/maxent/SWD_fil
 
 Model results in : `/mnt/projects/mood/RVF_Mauritania/maxent/models/`
 
-|Model version | Used data version | Description |
-| - | - | - |
-| - | - | not versioned; first tests with october 2020 model; <br/> results within `model_10_2020` and with test data splitted `model_10_2020_with_testdata`|
-| 01 | 01 | single model with combined disease data |
-| 02 | 01 | monthly models (for each month with at least single positive sample) |
-| 03 | 02 | monhtly model, only for octobre 2020 |
+|Model version | Used data version | Description | Notes |
+| - | - | - | - |
+| - | - | not versioned; first tests with october 2020 model; <br/> results within `model_10_2020` and with test data splitted `model_10_2020_with_testdata`| |
+| 01 | 01 | single model with all disease data combined | variable contribution: ca. 70 % impact of current precipitaion |
+| 02 | 01 | monthly models (for each month with at least single positive sample) | very different results when applying model + within variable contribution; mostly precipitation driving factor or model |
+| 03 | 02 | monhtly model, only for octobre 2020 | variable contribution: roughly 40 % for 2 month prior and 40 % for 1 month prior precipitation |
+| 04 | 02 | single model with all disease data combined | variable contribution: ca. 80 % impact of current precipitaion|
+| 05 | 02 | single model with 09/10 2020 and 09/10 2022 data combined (the month with the most positive disease data) | variable contribution: 30 % lst night, 30 % current month precipitation|
