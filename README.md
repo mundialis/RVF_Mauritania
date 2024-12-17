@@ -24,7 +24,7 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
             - analyse impact of different region settings (e.g. only area buffered around given positive samples vs. complete Mauritania, ...)
       - Model options: Usage of monthly disease data
         - Option 1: Single Model
-          -  Combine all given positive and negative samples from all months/years
+          - Combine all given positive and negative samples from all months/years
           - Sample Covariates for all given positive and negative results (i.e. create monhtly SWD files) and combine them --> use this as input to train one single model
         - Option 2: Monthly Models
           - train monthly models (for which enough positive (and negative) samples given)
