@@ -71,5 +71,5 @@ Notes:
 - when using all data: current month precipitation major driver of model
 - for monthly models it depends (10-2020: seems to deliver "good" results -> 2 month prior precipitation large driver, but not the only driver)
 - keeping duplicates makes difference on model results -> no clear indication if results better/or worse, or rather dependent on model version
-- Best results so far: mv03 or mv06 (but differences between them)
+- Best results so far: **mv03** or **mv06** (but differences between them; mv06 eventually more reliable, cause more data used for training, compared to mv03)
   - "Best": model is not mainly driven by single Covariate + application to 2020 looks reasonable (no strong risk change "borders", geometric features/artefacts (?), ...) 
