@@ -19,7 +19,7 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
       - Script: [potential_risk_areas_train.sh](src/potential_risk_areas_train.sh)
       - AOI/Region Setting
         - use all given positive and negative samples -> AOI defined by them (Covariates only sampled at negative/positive result coordinates)
-        - in future following could be further tested/investigated (optional)
+        - in future the following could be further tested/investigated (optional)
           - only give positive samples -> negative samples will be sampled as background points by MaxEnt tool
             - analyse impact of different region settings (e.g. only area buffered around given positive samples vs. complete Mauretania, ...)
       - Model options: Usage of monthly disease data
