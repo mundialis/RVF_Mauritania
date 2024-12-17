@@ -85,6 +85,7 @@ while [ "$DATE_TMP" != ${STOPDATE} ]; do
     # -> e.g. use previous month in this case
 
     # apply model
+    # TODO: give covariates which should be used explicit within config (not indirect via model version)
     # Note: removed:
     # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},
     if [ ${MODEL_V} -eq "01" ] || [ ${MODEL_V} -eq "02" ]; then

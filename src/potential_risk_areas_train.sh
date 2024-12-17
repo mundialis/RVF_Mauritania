@@ -52,6 +52,7 @@ r.mask raster=aoi_buf_rast@RVF_Mauritania
 # Helper variable, for information about loop iteration
 ITER=0
 
+# TODO: give month which should be used explicit within config (not indirect via model version)
 # Set selection of used disease data for modeling
 if [ ${MODEL_V} -eq "03" ]; then
     # loop / use only 10-2020 (model version 03)
