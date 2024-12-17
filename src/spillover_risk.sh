@@ -124,9 +124,40 @@ for YEAR in `seq 2019 2023` ; do
 
     # geometric mean for livestock at risk
     r.mapcalc "livestock_geomean_${YEAR}${MONTH2D} = sqrt(livestock_abs_risk_log_scaled_${YEAR}${MONTH2D} * livestock_prop_risk_log_scaled_${YEAR}${MONTH2D})"
+
+    # geometric mean for human and livestock at risk
+    r.mapcalc "spillover_geomean_${YEAR}${MONTH2D} = sqrt(human_geomean_${YEAR}${MONTH2D} * livestock_geomean_${YEAR}${MONTH2D})"
+    # without zero values
+    r.mapcalc "spillover_geomean_nozero_${YEAR}${MONTH2D} = if(spillover_geomean_${YEAR}${MONTH2D} == 0, null(), spillover_geomean_${YEAR}${MONTH2D})"
   done
 done
 
-# quintile ranking for each spillover value from all geographic units (pixels), months, and years
+# quintile ranking for each spillover value from all geographic units (pixels), months, and years, excluding 0 cells
+# r.univar with all spillover_geomean_* maps
+# the commandline must not become too long !
+MAPLIST=`g.list rast map=. pattern=spillover_geomean_nozero_* separator=comma`
+eval `r.univar -ge map=$MAPLIST percentile=20,40,60,80`
+
+# rules for r.recode
+# 0:${percentile_20}:1
+# ${percentile_20}:${percentile_40}:2
+# ${percentile_40}:${percentile_60}:3
+# ${percentile_60}:${percentile_80}:4
+# ${percentile_80}:10:5
+
+for YEAR in `seq 2019 2023` ; do
+  for MONTH in `seq 1 12` ; do
+    MONTH2D=`prinf "%02d\n" $MONTH`
+    
+    r.recode
+  done
+done
 
 # average quintile for each pixel and month across all years
+for MONTH in `seq 1 12` ; do
+  MONTH2D=`prinf "%02d\n" $MONTH`
+  # all maps over all years for this month: average quintile:
+  # synoptic spillover potential for each pixel and month across all years
+  MAPLIST=
+  r.series in=$MAPLIST method=average out=
+done
