@@ -52,7 +52,7 @@ if [ -z "$ENDDATE" ] ; then
   exit 1
 fi
 
-# Note: for precipitation data 2 months prior are need therefore
+# Note: for precipitation data 2 months prior are needed therefore
 #       earliest analysis month March 2019 (STARTDATE + 2 month)
 DATE_TMP=$(date -I -d "$STARTDATE + 2 month")
 # stopdata: enddate + 1 month,
