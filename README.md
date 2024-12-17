@@ -7,12 +7,16 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
   - Installation with `r.maxent.setup`:
     - Note: need to have java installed
 - Analysis
+  - In short (details see below):
+    - Define configuration file: [potential_risk_areas_config.cfg](config/potential_risk_areas_config.cfg)
+    - Train Model: [potential_risk_areas_train.sh](src/potential_risk_areas_train.sh)
+    - Apply Mode: [potential_risk_areas_predict.sh](src/potential_risk_areas_predict.sh)
   - Input: prepared Disease Data and Covariates
     - defined within [config](config/potential_risk_areas_config.cfg)
     - see also table in section [Data Versions](#data-versions)
   - Analysis procedure:
     - Train model:
-      - Use script: [potential_risk_areas_train.sh](src/potential_risk_areas_train.sh)
+      - Script: [potential_risk_areas_train.sh](src/potential_risk_areas_train.sh)
       - AOI/Region Setting
         - use all given positive and negative samples -> AOI defined by them (Covariates only sampled at negative/positive result coordinates)
         - in future following could be further tested/investigated (optional)
@@ -26,7 +30,7 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
           - train monthly models (for which enough positive (and negative) samples given)
         - Note: see also table in section [Model Versions](#model-versions)
     - Apply model
-      - Use script: [potential_risk_areas_predict.sh](src/potential_risk_areas_predict.sh)
+      - Script: [potential_risk_areas_predict.sh](src/potential_risk_areas_predict.sh)
       - apply model to all monthly data
         - from 2019-2023, see also `PREDICTION` section within [config](config/potential_risk_areas_config.cfg)
     - Further analysis ideas
