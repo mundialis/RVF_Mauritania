@@ -55,7 +55,7 @@ fi
 # Note: for precipitation data 2 months prior are needed therefore
 #       earliest analysis month March 2019 (STARTDATE + 2 month)
 DATE_TMP=$(date -I -d "$STARTDATE + 2 month")
-# stopdata: enddate + 1 month,
+# stopdate: enddate + 1 month,
 # so that enddate is calculated within while loop in last iteration
 STOPDATE=$(date -I -d "$ENDDATE + 1 month")
 
