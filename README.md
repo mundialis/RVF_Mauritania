@@ -10,7 +10,7 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
   - In short (details see below):
     - Define configuration file: [potential_risk_areas_config.cfg](config/potential_risk_areas_config.cfg)
     - Train Model: [potential_risk_areas_train.sh](src/potential_risk_areas_train.sh)
-    - Apply Mode: [potential_risk_areas_predict.sh](src/potential_risk_areas_predict.sh)
+    - Apply Model: [potential_risk_areas_predict.sh](src/potential_risk_areas_predict.sh)
   - Input: prepared Disease Data and Covariates
     - defined within [config](config/potential_risk_areas_config.cfg)
     - see also table in section [Data Versions](#data-versions)
