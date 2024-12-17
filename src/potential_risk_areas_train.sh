@@ -49,9 +49,10 @@ g.region raster=aoi_buf_rast@RVF_Mauritania -p
 r.mask -r
 r.mask raster=aoi_buf_rast@RVF_Mauritania
 
-# helper variable, for information about loop iteration
+# Helper variable, for information about loop iteration
 ITER=0
 
+# Set selection of used disease data for modeling
 if [ ${MODEL_V} -eq "03" ]; then
     # loop / use only 10-2020 (model version 03)
     LOOP_VECT_LIST=`g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/10_2020} mapset=${DISEASE_MAPSET}`
@@ -59,6 +60,7 @@ elif [ ${MODEL_V} -eq "05" ] || [ ${MODEL_V} -eq "07" ]; then
     # loop / use only the 4 month with the most data samples
     LOOP_VECT_LIST=`g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/09_2020},${SPECIES_MAP//MONTH_YEAR/10_2020},${SPECIES_MAP//MONTH_YEAR/09_2022},${SPECIES_MAP//MONTH_YEAR/10_2022} mapset=${DISEASE_MAPSET}`
 else
+    # loop / use all given disease data
     LOOP_VECT_LIST=`g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/"*"} mapset=${DISEASE_MAPSET}`
 fi
 
@@ -80,7 +82,6 @@ for VECT_POS in ${LOOP_VECT_LIST} ; do
         YEAR=${DATE_SPLIT[4]}
         DATE_TMP="${YEAR}-${MONTH}-01"
         
-
         # date for precipitation: one and two month prior
         # one month prior
         DATE_1_PRIOR=$(date -I -d "$DATE_TMP - 1 month"); DATE_SPLIT=(${DATE_1_PRIOR//-/ }); 
@@ -93,9 +94,9 @@ for VECT_POS in ${LOOP_VECT_LIST} ; do
         mkdir $(dirname "$SPECIES_OUTPUT") -p
 
         # generate SWD files for Maxent
-        # removed:
+        # for dv01 removed:
         # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},\
-        # for dv02:
+        # for dv02 removed:
         # - dist to water bodies: ${DIST_TO_WB//YEAR_MONTH/${YEAR}_${MONTH}} \
         if [ -f ${SPECIES_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} ]; then
             echo "${SPECIES_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} already exists, skipping v.maxent.swd step"
@@ -137,7 +138,7 @@ done
 if [ ${SING_MOD} -eq 1 ]; then
     # replace month-year specifics of species name within SWD files
     # otherwise one model per species trained/returned
-    # -> we want one single, trained with all month-year data combined
+    # -> here we want one single, trained with all month-year data combined
     for DATE in `tail -n +3 ${DISEASE_COMB_DATES}` ; do
         DATE_SPLIT=(${DATE//-/ });
         STR="${DATE_SPLIT[1]}_${DATE_SPLIT[0]}";
@@ -147,13 +148,15 @@ fi
 
 # train model
 mkdir ${OUT_MODEL} -p
-# d flag: keep duplicates
-# n flag: avoid adding more data to background samples --> when set, model seems NOT having enough data for reasonable training
 r.maxent.train -g -j -d \
     samplesfile=${SPECIES_OUTPUT_COMB} \
     environmentallayersfile=${BGR_OUTPUT_COMB} \
     outputdirectory=${OUT_MODEL} --o
-    # randomtestpoints=15 
-    # TODO: add description
-    # optional (Note: only possibe):
-    # flag y and b + option samplepredictions and backgroundpredictions
+    # - flags:
+    # d flag: keep duplicates
+    # n flag: avoid adding more data to background samples --> when set, model seems NOT having enough data for reasonable training
+    # - for test set:
+    # randomtestpoints=15 OR
+    # testsamplesfile=...
+    # - for creation of prediction of given input sample and background vector points:
+    # flag y and b + name via option <samplepredictions> and <backgroundpredictions>

@@ -25,7 +25,7 @@
 # ---------------------
 
 if [ "$#" -ne 1 ]; then
-    echo -e "ERROR: Missing configfile.\nUsage: potential_risk_areas_apply.sh /path/to/config.cfg"
+    echo -e "ERROR: Missing configfile.\nUsage: potential_risk_areas_predict.sh /path/to/config.cfg"
     exit 1
 fi
 
