@@ -3,46 +3,46 @@ Repository for modeling of Rift Valley Fever (RVF) in Mauritania
 
 ## Potential Risk Areas
 - Tool for Analysis: [Maxent](https://biodiversityinformatics.amnh.org/open_source/maxent/)
-  - used within GRASS GIS
+  - Used within GRASS GIS
   - Installation with `r.maxent.setup`:
     - Note: need to have java installed
 - Analysis
   - In short (details see below):
     - Define configuration file: [potential_risk_areas_config.cfg](config/potential_risk_areas_config.cfg)
-    - Train Model: [potential_risk_areas_train.sh](src/potential_risk_areas_train.sh)
-    - Apply Model: [potential_risk_areas_predict.sh](src/potential_risk_areas_predict.sh)
+    - Train model: [potential_risk_areas_train.sh](src/potential_risk_areas_train.sh)
+    - Apply model: [potential_risk_areas_predict.sh](src/potential_risk_areas_predict.sh)
   - Input: prepared Disease Data and Covariates
-    - defined within [config](config/potential_risk_areas_config.cfg)
-    - see also table in section [Data Versions](#data-versions)
+    - Defined within [config](config/potential_risk_areas_config.cfg)
+    - See also table in section [Data Versions](#data-versions)
   - Analysis procedure:
     - Train model:
       - Script: [potential_risk_areas_train.sh](src/potential_risk_areas_train.sh)
       - AOI/Region Setting
-        - use all given positive and negative samples -> AOI defined by them (Covariates only sampled at negative/positive result coordinates)
-        - in future the following could be further tested/investigated (optional)
-          - only use positive samples -> negative samples will be sampled as background points by MaxEnt tool
-            - analyse impact of different region settings (e.g. only area buffered around given positive samples vs. complete Mauritania, ...)
+        - Use all given positive and negative samples -> AOI defined by them (Covariates only sampled at negative/positive result coordinates)
+        - In future the following could be further tested/investigated (optional)
+          - Only use positive samples -> negative samples will be sampled as background points by MaxEnt tool
+            - Analyse impact of different region settings (e.g. only area buffered around given positive samples vs. complete Mauritania, ...)
       - Model options: Usage of monthly disease data
-        - Option 1: Single Model
+        - Option 1: single model
           - Combine all given positive and negative samples from all months/years
           - Sample Covariates for all given positive and negative results (i.e. create monhtly SWD files) and combine them --> use this as input to train one single model
-        - Option 2: Monthly Models
-          - train monthly models (for which enough positive (and negative) samples given)
+        - Option 2: monthly models
+          - Train monthly models (for which enough positive (and negative) samples given)
         - Note: see also table in section [Model Versions](#model-versions)
     - Apply model
       - Script: [potential_risk_areas_predict.sh](src/potential_risk_areas_predict.sh)
-      - apply model to all monthly data
-        - from 2019-2023, see also `PREDICTION` section within [config](config/potential_risk_areas_config.cfg)
+      - Apply model to all monthly data
+        - From 2019-2023, see also `PREDICTION` section within [config](config/potential_risk_areas_config.cfg)
     - Further analysis ideas
       - Finetune Input - Approach:
         - Covariates
-          - first use all (previous selected) covariates
-          - then iterative removal of non useful datasets
-          - use feature importance e.g. jackknife plots
+          - First use all (previous selected) Covariates
+          - Then iterative removal of non useful datasets
+          - Use feature importance e.g. jackknife plots
           - Note: partially already done (see [Data Versions](#data-versions))
         - Features/Mathematical transformations (done by Maxent)
-          - amount, selection, ...
-          - see parameters from `r.maxent.train`: `lq2lqptthreshold`, `l2lqthreshold`, `hingethreshold` and flags `l,q,p,t,h,a`
+          - Amount, selection, ...
+          - See parameters from `r.maxent.train`: `lq2lqptthreshold`, `l2lqthreshold`, `hingethreshold` and flags `l,q,p,t,h,a`
         - Note: if multiple models (i.e. monhtly models used), has to be done for each of them
 
 ### Data Versions
@@ -72,9 +72,9 @@ Model results in : `/mnt/projects/mood/RVF_Mauritania/maxent/models/`
 
 
 Notes:
-- when using all data: current month precipitation mostly major driver of model
-- for monthly models it depends (10-2020: seems to deliver "good" results -> 2 month prior precipitation large driver, but not the only driver)
-- keeping duplicates makes difference on model results -> no clear indication if results better/or worse, or rather dependent on model version
+- When using all data: current month precipitation mostly major driver of model
+- For monthly models it depends (10-2020: seems to deliver "good" results -> 2 month prior precipitation large driver, but not the only driver)
+- Keeping duplicates makes difference on model results -> no clear indication if results better/or worse, or rather dependent on model version
 - Best results so far:
   - "Best" means: model is not mainly driven by single Covariate + application to 2020 looks reasonable (no strong risk change "borders", geometric features/artefacts (?), ...)
   - **mv03** or **mv06** (but differences between them; mv06 eventually more reliable, cause more data used for training, compared to mv03)
