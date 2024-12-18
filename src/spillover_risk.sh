@@ -5,15 +5,23 @@ unset LC_ALL
 LC_NUMERIC=C
 export LC_NUMERIC
 
+# set variables (map names for human population, livestock population and
+# maxent suitability maps)
+HUMAN_POPDENS="mrt_ppp_2020_1km_Aggregated_UNadj@WorldPop_Mauritania"
+# TODO: add all livestock together (CTL, GTS, SHP)
+LIVESTOCK_POPDENS="<MAP>@GLW_2020_Mauritania"
+MAXENT_MODEL_VERSION="mv06"
+
+# TODO: set region
+# TODO: use mask?
+
 # number of humans and livestock at risk per pixel
 
 # optional preparation if needed:
 # convert human population density (number / km2) to absolute number of people
-HUMAN_POPDENS=""
 r.mapcalc "human_pop_abs = $HUMAN_POPDENS * area() / 1000000.0"
 
 # convert livestock population density (number / km2) to absolute number of livestock
-LIVESTOCK_POPDENS=""
 r.mapcalc "livestock_pop_abs = $LIVESTOCK_POPDENS * area() / 1000000.0"
 
 
@@ -38,18 +46,19 @@ for YEAR in `seq 2019 2023` ; do
   for MONTH in `seq 1 12` ; do
     MONTH2D=`prinf "%02d\n" $MONTH`
 
-    # TODO: adjust to actual map names
-    MAXENT_SUITABILITY="maxent_prefix_${YEAR}${MONTH2D}"
+    MAXENT_SUITABILITY="model_${MONTH2D}_${YEAR}_${MAXENT_MODEL_VERSION}"
 
     # absolute number of humans at risk
     r.mapcalc "human_abs_risk_${YEAR}${MONTH2D} = human_pop_abs * $MAXENT_SUITABILITY"
 
-    # proportion at risk: MAXENT_SUITABILITY
+    # proportion of humans at risk: MAXENT_SUITABILITY
 
+    # TODO: add livestock movement to livestock population
+    # wet season (June to October) and the dry season (November to May)
     # absolute number of livestock at risk
     r.mapcalc "livestock_abs_risk_${YEAR}${MONTH2D} = livestock_pop_abs * $MAXENT_SUITABILITY"
 
-    # proportion at risk: MAXENT_SUITABILITY
+    # proportion of livestock at risk: MAXENT_SUITABILITY
 
     # natural log of humans at risk
     r.mapcalc "human_abs_risk_log_${YEAR}${MONTH2D} = log(human_abs_risk_${YEAR}${MONTH2D})"
@@ -99,13 +108,12 @@ for YEAR in `seq 2019 2023` ; do
   done
 done
 
-# scale the log maps to be between 0 and 10 using to overall minima and maxima
+# scale the log maps to be between 0 and 10 using the overall minima and maxima
 for YEAR in `seq 2019 2023` ; do
   for MONTH in `seq 1 12` ; do
     MONTH2D=`prinf "%02d\n" $MONTH`
 
-    # TODO: adjust to actual map names
-    MAXENT_SUITABILITY="maxent_prefix_${YEAR}${MONTH2D}"
+    MAXENT_SUITABILITY="model_${MONTH2D}_${YEAR}_${MAXENT_MODEL_VERSION}"
 
     # scale natural log of absolute number of humans at risk
     r.mapcalc "human_abs_risk_log_scaled_${YEAR}${MONTH2D} = ((human_abs_risk_log_${YEAR}${MONTH2D} - $TOTAL_LOG_H_ABS_MIN) / ($TOTAL_LOG_H_ABS_MAX - $TOTAL_LOG_H_ABS_MIN)) * 10.0"
@@ -125,8 +133,9 @@ for YEAR in `seq 2019 2023` ; do
     # geometric mean for livestock at risk
     r.mapcalc "livestock_geomean_${YEAR}${MONTH2D} = sqrt(livestock_abs_risk_log_scaled_${YEAR}${MONTH2D} * livestock_prop_risk_log_scaled_${YEAR}${MONTH2D})"
 
-    # geometric mean for human and livestock at risk
+    # geometric mean for humans and livestock at risk -> final spillover potential
     r.mapcalc "spillover_geomean_${YEAR}${MONTH2D} = sqrt(human_geomean_${YEAR}${MONTH2D} * livestock_geomean_${YEAR}${MONTH2D})"
+    
     # without zero values
     r.mapcalc "spillover_geomean_nozero_${YEAR}${MONTH2D} = if(spillover_geomean_${YEAR}${MONTH2D} == 0, null(), spillover_geomean_${YEAR}${MONTH2D})"
   done
@@ -135,9 +144,10 @@ done
 # quintile ranking for each spillover value from all geographic units (pixels), months, and years, excluding 0 cells
 # r.univar with all spillover_geomean_* maps
 # the commandline must not become too long !
-MAPLIST=`g.list rast map=. pattern=spillover_geomean_nozero_* separator=comma`
+MAPLIST=`g.list rast mapset=. pattern=spillover_geomean_nozero_* separator=comma`
 eval `r.univar -ge map=$MAPLIST percentile=20,40,60,80`
 
+# TODO: write rules to file?
 # rules for r.recode
 # 0:${percentile_20}:1
 # ${percentile_20}:${percentile_40}:2
@@ -145,11 +155,13 @@ eval `r.univar -ge map=$MAPLIST percentile=20,40,60,80`
 # ${percentile_60}:${percentile_80}:4
 # ${percentile_80}:10:5
 
+
+# assign coded quintile to each pixel according to the quintile its value falls into
 for YEAR in `seq 2019 2023` ; do
   for MONTH in `seq 1 12` ; do
     MONTH2D=`prinf "%02d\n" $MONTH`
-    
-    r.recode
+    # TODO: loop over all monthly maps and recode (with copy)
+    r.recode input= output= rules=
   done
 done
 
@@ -159,5 +171,5 @@ for MONTH in `seq 1 12` ; do
   # all maps over all years for this month: average quintile:
   # synoptic spillover potential for each pixel and month across all years
   MAPLIST=
-  r.series in=$MAPLIST method=average out=
+  r.series input=$MAPLIST method=average output=
 done
