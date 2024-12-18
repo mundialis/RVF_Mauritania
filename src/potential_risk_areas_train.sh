@@ -94,6 +94,7 @@ for VECT_POS in ${LOOP_VECT_LIST} ; do
         # folder for each data version -> create first
         mkdir $(dirname "$SPECIES_OUTPUT") -p
 
+        # TODO: dependet on model version: set input (via config?)
         # generate SWD files for Maxent
         # for dv01 removed:
         # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},\
@@ -148,11 +149,16 @@ if [ ${SING_MOD} -eq 1 ]; then
 fi
 
 # train model
+# TODO: flag within config?
+flags=""
+if [ ${MODEL_V} -eq "06" ] || [ ${MODEL_V} -eq "07" ]; then
+    flags="-d"
+fi
 mkdir ${OUT_MODEL} -p
-r.maxent.train -g -j -d \
+r.maxent.train -g -j \
     samplesfile=${SPECIES_OUTPUT_COMB} \
     environmentallayersfile=${BGR_OUTPUT_COMB} \
-    outputdirectory=${OUT_MODEL} --o
+    outputdirectory=${OUT_MODEL} ${flags} --o
     # - flags:
     # d flag: keep duplicates
     # n flag: avoid adding more data to background samples --> when set, model seems NOT having enough data for reasonable training
