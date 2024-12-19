@@ -91,20 +91,20 @@ for YEAR in `seq 2019 2023` ; do
       TOTAL_LOG_L_PROP_MAX=$max
     else
       eval `r.info -s human_abs_risk_log_${YEAR}${MONTH2D}`
-      TOTAL_LOG_H_ABS_MIN=`echo $TOTAL_LOG_H_ABS_MIN $min | awk '{printf "%g\n", $1 < $2 ? $1 : $2}'`
-      TOTAL_LOG_H_ABS_MAX=`echo $TOTAL_LOG_H_ABS_MAX $max | awk '{printf "%g\n", $1 > $2 ? $1 : $2}'`
+      TOTAL_LOG_H_ABS_MIN=`echo $TOTAL_LOG_H_ABS_MIN $min | awk '{printf "%g\n", ($1 < $2 ? $1 : $2)}'`
+      TOTAL_LOG_H_ABS_MAX=`echo $TOTAL_LOG_H_ABS_MAX $max | awk '{printf "%g\n", ($1 > $2 ? $1 : $2)}'`
 
       eval `r.info -s human_prop_risk_log_${YEAR}${MONTH2D}`
-      TOTAL_LOG_H_PROP_MIN=`echo $TOTAL_LOG_H_PROP_MIN $min | awk '{printf "%g\n", $1 < $2 ? $1 : $2}'`
-      TOTAL_LOG_H_PROP_MAX=`echo $TOTAL_LOG_H_PROP_MAX $max | awk '{printf "%g\n", $1 > $2 ? $1 : $2}'`
+      TOTAL_LOG_H_PROP_MIN=`echo $TOTAL_LOG_H_PROP_MIN $min | awk '{printf "%g\n", ($1 < $2 ? $1 : $2)}'`
+      TOTAL_LOG_H_PROP_MAX=`echo $TOTAL_LOG_H_PROP_MAX $max | awk '{printf "%g\n", ($1 > $2 ? $1 : $2)}'`
 
       eval `r.info -s livestock_abs_risk_log_${YEAR}${MONTH2D}`
-      TOTAL_LOG_L_ABS_MIN=`echo $TOTAL_LOG_L_ABS_MIN $min | awk '{printf "%g\n", $1 < $2 ? $1 : $2}'`
-      TOTAL_LOG_L_ABS_MAX=`echo $TOTAL_LOG_L_ABS_MAX $max | awk '{printf "%g\n", $1 > $2 ? $1 : $2}'`
+      TOTAL_LOG_L_ABS_MIN=`echo $TOTAL_LOG_L_ABS_MIN $min | awk '{printf "%g\n", ($1 < $2 ? $1 : $2)}'`
+      TOTAL_LOG_L_ABS_MAX=`echo $TOTAL_LOG_L_ABS_MAX $max | awk '{printf "%g\n", ($1 > $2 ? $1 : $2)}'`
 
       eval `r.info -s livestock_prop_risk_log_${YEAR}${MONTH2D}`
-      TOTAL_LOG_L_PROP_MIN=`echo $TOTAL_LOG_L_PROP_MIN $min | awk '{printf "%g\n", $1 < $2 ? $1 : $2}'`
-      TOTAL_LOG_L_PROP_MAX=`echo $TOTAL_LOG_L_PROP_MAX $max | awk '{printf "%g\n", $1 > $2 ? $1 : $2}'`
+      TOTAL_LOG_L_PROP_MIN=`echo $TOTAL_LOG_L_PROP_MIN $min | awk '{printf "%g\n", ($1 < $2 ? $1 : $2)}'`
+      TOTAL_LOG_L_PROP_MAX=`echo $TOTAL_LOG_L_PROP_MAX $max | awk '{printf "%g\n", ($1 > $2 ? $1 : $2)}'`
     fi
   done
 done
