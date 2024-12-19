@@ -24,7 +24,7 @@ MAXENT_MODEL_VERSION="mv06"
 #r.mapcalc "human_pop_abs = $HUMAN_POPDENS * area() / 1000000.0"
 
 # convert livestock population density (number / km2) to absolute number of livestock
-r.mapcalc "livestock_pop_abs = $LIVESTOCK_POPDENS * area() / 1000000.0"
+r.mapcalc "livestock_pop_abs = \"${LIVESTOCK_POPDENS}\" * area() / 1000000.0"
 
 
 # loop over all years and months
@@ -46,7 +46,7 @@ FIRST=1
 
 for YEAR in `seq 2019 2023` ; do
   for MONTH in `seq 1 12` ; do
-    MONTH2D=`prinf "%02d\n" $MONTH`
+    MONTH2D=`printf "%02d\n" $MONTH`
 
     MAXENT_SUITABILITY="model_${MONTH2D}_${YEAR}_${MAXENT_MODEL_VERSION}"
 
@@ -112,7 +112,7 @@ done
 # scale the log maps to be between 0 and 10 using the overall minima and maxima
 for YEAR in `seq 2019 2023` ; do
   for MONTH in `seq 1 12` ; do
-    MONTH2D=`prinf "%02d\n" $MONTH`
+    MONTH2D=`printf "%02d\n" $MONTH`
 
     MAXENT_SUITABILITY="model_${MONTH2D}_${YEAR}_${MAXENT_MODEL_VERSION}"
 
@@ -162,7 +162,7 @@ ${percentile_80}:10:5" >$RULESFILE
 # assign coded quintile to each pixel according to the quintile its value falls into
 for YEAR in `seq 2019 2023` ; do
   for MONTH in `seq 1 12` ; do
-    MONTH2D=`prinf "%02d\n" $MONTH`
+    MONTH2D=`printf "%02d\n" $MONTH`
     # TODO: loop over all monthly maps and recode (with copy)
     r.recode input=spillover_geomean_${YEAR}${MONTH2D} output=spillover_quintile_${YEAR}${MONTH2D} rules=$RULESFILE || exit 1
   done
@@ -170,7 +170,7 @@ done
 
 # average quintile for each pixel and month across all years
 for MONTH in `seq 1 12` ; do
-  MONTH2D=`prinf "%02d\n" $MONTH`
+  MONTH2D=`printf "%02d\n" $MONTH`
   # all maps over all years for this month: average quintile:
   # synoptic spillover potential for each pixel and month across all years
   MAPLIST=`g.list rast mapset=. pattern=spillover_quintile_????${MONTH2D} separator=comma`
