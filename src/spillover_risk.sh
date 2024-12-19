@@ -147,13 +147,15 @@ done
 MAPLIST=`g.list rast mapset=. pattern=spillover_geomean_nozero_* separator=comma`
 eval `r.univar -ge map=$MAPLIST percentile=20,40,60,80`
 
-# TODO: write rules to file?
-# rules for r.recode
-# 0:${percentile_20}:1
-# ${percentile_20}:${percentile_40}:2
-# ${percentile_40}:${percentile_60}:3
-# ${percentile_60}:${percentile_80}:4
-# ${percentile_80}:10:5
+RULESFILE=`g.tempfile pid=$$`
+
+# write rules for r.recode to file
+
+echo "0:${percentile_20}:1
+${percentile_20}:${percentile_40}:2
+${percentile_40}:${percentile_60}:3
+${percentile_60}:${percentile_80}:4
+${percentile_80}:10:5" >$RULESFILE
 
 
 # assign coded quintile to each pixel according to the quintile its value falls into
@@ -161,7 +163,7 @@ for YEAR in `seq 2019 2023` ; do
   for MONTH in `seq 1 12` ; do
     MONTH2D=`prinf "%02d\n" $MONTH`
     # TODO: loop over all monthly maps and recode (with copy)
-    r.recode input= output= rules=
+    r.recode input=spillover_geomean_${YEAR}${MONTH2D} output=spillover_quintile_${YEAR}${MONTH2D} rules=$RULESFILE
   done
 done
 
@@ -170,6 +172,6 @@ for MONTH in `seq 1 12` ; do
   MONTH2D=`prinf "%02d\n" $MONTH`
   # all maps over all years for this month: average quintile:
   # synoptic spillover potential for each pixel and month across all years
-  MAPLIST=
-  r.series input=$MAPLIST method=average output=
+  MAPLIST=`g.list rast mapset=. pattern=spillover_quintile_????${MONTH2D} separator=comma`
+  r.series input=$MAPLIST method=average output=spillover_quintile_month_${MONTH2D}
 done
