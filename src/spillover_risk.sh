@@ -7,7 +7,9 @@ export LC_NUMERIC
 
 # set variables (map names for human population, livestock population and
 # maxent suitability maps)
-HUMAN_POPDENS="mrt_ppp_2020_1km_Aggregated_UNadj@WorldPop_Mauritania"
+# mrt_ppp_2020_1km_Aggregated_UNadj: Estimated total number of people per grid-cell.
+# https://hub.worldpop.org/geodata/summary?id=37504
+HUMAN_POPABS="mrt_ppp_2020_1km_Aggregated_UNadj@WorldPop_Mauritania"
 # TODO: add all livestock together (CTL, GTS, SHP)
 LIVESTOCK_POPDENS="<MAP>@GLW_2020_Mauritania"
 MAXENT_MODEL_VERSION="mv06"
@@ -19,7 +21,7 @@ MAXENT_MODEL_VERSION="mv06"
 
 # optional preparation if needed:
 # convert human population density (number / km2) to absolute number of people
-r.mapcalc "human_pop_abs = $HUMAN_POPDENS * area() / 1000000.0"
+#r.mapcalc "human_pop_abs = $HUMAN_POPDENS * area() / 1000000.0"
 
 # convert livestock population density (number / km2) to absolute number of livestock
 r.mapcalc "livestock_pop_abs = $LIVESTOCK_POPDENS * area() / 1000000.0"
@@ -49,24 +51,24 @@ for YEAR in `seq 2019 2023` ; do
     MAXENT_SUITABILITY="model_${MONTH2D}_${YEAR}_${MAXENT_MODEL_VERSION}"
 
     # absolute number of humans at risk
-    r.mapcalc "human_abs_risk_${YEAR}${MONTH2D} = human_pop_abs * $MAXENT_SUITABILITY"
+    r.mapcalc "human_abs_risk_${YEAR}${MONTH2D} = $HUMAN_POPABS * $MAXENT_SUITABILITY" || exit 1
 
     # proportion of humans at risk: MAXENT_SUITABILITY
 
     # TODO: add livestock movement to livestock population
     # wet season (June to October) and the dry season (November to May)
     # absolute number of livestock at risk
-    r.mapcalc "livestock_abs_risk_${YEAR}${MONTH2D} = livestock_pop_abs * $MAXENT_SUITABILITY"
+    r.mapcalc "livestock_abs_risk_${YEAR}${MONTH2D} = livestock_pop_abs * $MAXENT_SUITABILITY" || exit 1
 
     # proportion of livestock at risk: MAXENT_SUITABILITY
 
     # natural log of humans at risk
-    r.mapcalc "human_abs_risk_log_${YEAR}${MONTH2D} = log(human_abs_risk_${YEAR}${MONTH2D})"
-    r.mapcalc "human_prop_risk_log_${YEAR}${MONTH2D} = log($MAXENT_SUITABILITY)"
+    r.mapcalc "human_abs_risk_log_${YEAR}${MONTH2D} = log(human_abs_risk_${YEAR}${MONTH2D})" || exit 1
+    r.mapcalc "human_prop_risk_log_${YEAR}${MONTH2D} = log($MAXENT_SUITABILITY)" || exit 1
 
     # natural log of livestock at risk
-    r.mapcalc "livestock_abs_risk_log_${YEAR}${MONTH2D} = log(livestock_abs_risk_${YEAR}${MONTH2D})"
-    r.mapcalc "livestock_prop_risk_log_${YEAR}${MONTH2D} = log($MAXENT_SUITABILITY)"
+    r.mapcalc "livestock_abs_risk_log_${YEAR}${MONTH2D} = log(livestock_abs_risk_${YEAR}${MONTH2D})" || exit 1
+    r.mapcalc "livestock_prop_risk_log_${YEAR}${MONTH2D} = log($MAXENT_SUITABILITY)" || exit 1
 
     # minimum and maximum of these 4 logs across all pixels, months, and years
     eval `r.info -s human_abs_risk_log_${YEAR}${MONTH2D}`
@@ -116,28 +118,28 @@ for YEAR in `seq 2019 2023` ; do
     MAXENT_SUITABILITY="model_${MONTH2D}_${YEAR}_${MAXENT_MODEL_VERSION}"
 
     # scale natural log of absolute number of humans at risk
-    r.mapcalc "human_abs_risk_log_scaled_${YEAR}${MONTH2D} = ((human_abs_risk_log_${YEAR}${MONTH2D} - $TOTAL_LOG_H_ABS_MIN) / ($TOTAL_LOG_H_ABS_MAX - $TOTAL_LOG_H_ABS_MIN)) * 10.0"
+    r.mapcalc "human_abs_risk_log_scaled_${YEAR}${MONTH2D} = ((human_abs_risk_log_${YEAR}${MONTH2D} - $TOTAL_LOG_H_ABS_MIN) / ($TOTAL_LOG_H_ABS_MAX - $TOTAL_LOG_H_ABS_MIN)) * 10.0" || exit 1
 
     # scale natural log of proportion of humans at risk
-    r.mapcalc "human_prop_risk_log_scaled_${YEAR}${MONTH2D} = ((human_prop_risk_log_${YEAR}${MONTH2D} - $TOTAL_LOG_H_PROP_MIN) / ($TOTAL_LOG_H_PROP_MAX - $TOTAL_LOG_H_PROP_MIN)) * 10.0"
+    r.mapcalc "human_prop_risk_log_scaled_${YEAR}${MONTH2D} = ((human_prop_risk_log_${YEAR}${MONTH2D} - $TOTAL_LOG_H_PROP_MIN) / ($TOTAL_LOG_H_PROP_MAX - $TOTAL_LOG_H_PROP_MIN)) * 10.0" || exit 1
 
     # scale natural log of absolute number of livestock at risk
-    r.mapcalc "livestock_abs_risk_log_scaled_${YEAR}${MONTH2D} = ((livestock_abs_risk_log_${YEAR}${MONTH2D} - $TOTAL_LOG_L_ABS_MIN) / ($TOTAL_LOG_L_ABS_MAX - $TOTAL_LOG_L_ABS_MIN)) * 10.0"
+    r.mapcalc "livestock_abs_risk_log_scaled_${YEAR}${MONTH2D} = ((livestock_abs_risk_log_${YEAR}${MONTH2D} - $TOTAL_LOG_L_ABS_MIN) / ($TOTAL_LOG_L_ABS_MAX - $TOTAL_LOG_L_ABS_MIN)) * 10.0" || exit 1
 
     # scale natural log of proportion of livestock at risk
-    r.mapcalc "livestock_prop_risk_log_scaled_${YEAR}${MONTH2D} = ((livestock_prop_risk_log_${YEAR}${MONTH2D} - $TOTAL_LOG_L_PROP_MIN) / ($TOTAL_LOG_L_PROP_MAX - $TOTAL_LOG_L_PROP_MIN)) * 10.0"
+    r.mapcalc "livestock_prop_risk_log_scaled_${YEAR}${MONTH2D} = ((livestock_prop_risk_log_${YEAR}${MONTH2D} - $TOTAL_LOG_L_PROP_MIN) / ($TOTAL_LOG_L_PROP_MAX - $TOTAL_LOG_L_PROP_MIN)) * 10.0" || exit 1
 
     # geometric mean for humans at risk
-    r.mapcalc "human_geomean_${YEAR}${MONTH2D} = sqrt(human_abs_risk_log_scaled_${YEAR}${MONTH2D} * human_prop_risk_log_scaled_${YEAR}${MONTH2D})"
+    r.mapcalc "human_geomean_${YEAR}${MONTH2D} = sqrt(human_abs_risk_log_scaled_${YEAR}${MONTH2D} * human_prop_risk_log_scaled_${YEAR}${MONTH2D})" || exit 1
 
     # geometric mean for livestock at risk
-    r.mapcalc "livestock_geomean_${YEAR}${MONTH2D} = sqrt(livestock_abs_risk_log_scaled_${YEAR}${MONTH2D} * livestock_prop_risk_log_scaled_${YEAR}${MONTH2D})"
+    r.mapcalc "livestock_geomean_${YEAR}${MONTH2D} = sqrt(livestock_abs_risk_log_scaled_${YEAR}${MONTH2D} * livestock_prop_risk_log_scaled_${YEAR}${MONTH2D})" || exit 1
 
     # geometric mean for humans and livestock at risk -> final spillover potential
-    r.mapcalc "spillover_geomean_${YEAR}${MONTH2D} = sqrt(human_geomean_${YEAR}${MONTH2D} * livestock_geomean_${YEAR}${MONTH2D})"
+    r.mapcalc "spillover_geomean_${YEAR}${MONTH2D} = sqrt(human_geomean_${YEAR}${MONTH2D} * livestock_geomean_${YEAR}${MONTH2D})" || exit 1
     
     # without zero values
-    r.mapcalc "spillover_geomean_nozero_${YEAR}${MONTH2D} = if(spillover_geomean_${YEAR}${MONTH2D} == 0, null(), spillover_geomean_${YEAR}${MONTH2D})"
+    r.mapcalc "spillover_geomean_nozero_${YEAR}${MONTH2D} = if(spillover_geomean_${YEAR}${MONTH2D} == 0, null(), spillover_geomean_${YEAR}${MONTH2D})" || exit 1
   done
 done
 
@@ -163,7 +165,7 @@ for YEAR in `seq 2019 2023` ; do
   for MONTH in `seq 1 12` ; do
     MONTH2D=`prinf "%02d\n" $MONTH`
     # TODO: loop over all monthly maps and recode (with copy)
-    r.recode input=spillover_geomean_${YEAR}${MONTH2D} output=spillover_quintile_${YEAR}${MONTH2D} rules=$RULESFILE
+    r.recode input=spillover_geomean_${YEAR}${MONTH2D} output=spillover_quintile_${YEAR}${MONTH2D} rules=$RULESFILE || exit 1
   done
 done
 
@@ -173,5 +175,5 @@ for MONTH in `seq 1 12` ; do
   # all maps over all years for this month: average quintile:
   # synoptic spillover potential for each pixel and month across all years
   MAPLIST=`g.list rast mapset=. pattern=spillover_quintile_????${MONTH2D} separator=comma`
-  r.series input=$MAPLIST method=average output=spillover_quintile_month_${MONTH2D}
+  r.series input=$MAPLIST method=average output=spillover_quintile_month_${MONTH2D} || exit 1
 done
