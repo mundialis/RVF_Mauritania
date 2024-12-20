@@ -80,7 +80,7 @@ while [ "$DATE_TMP" != ${STOPDATE} ]; do
     DATE_2_PRIOR=$(date -I -d "$DATE_TMP - 2 month"); DATE_SPLIT=(${DATE_2_PRIOR//-/ });
     TMP_YEAR=${DATE_SPLIT[0]}; TMP_MONTH=${DATE_SPLIT[1]}; 
 
-    # TODO: 
+    # (TODO: only if water bodies or distance to water bodies used)
     # for dist to water bodies: data for 2023-04 are missing, since they are not available from CLMS
     # -> e.g. use previous month in this case
 
@@ -98,16 +98,6 @@ ${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${NDWI//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${DIST_TO_WB//YEAR_MONTH/${YEAR}_${MONTH}}"
       VARIABLES=ERA5_land_monthly_prectot_sum_30sec_2020_01_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2019_12_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2019_11_01T00_00_00,lst_day_monthly_2020_01_1km,lst_night_monthly_2020_01_1km,ndvi_filt_2020_01_01T00_00_00,ndwi_veg_monthly_2020_01_1km,dist_to_wb_2020_01_scaled
-    elif [ ${MODEL_V} -eq "03" ]; then
-    RASTERS="${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
-${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
-${PREC_2M//YEAR_MONTH/${TMP_YEAR}_${TMP_MONTH}},\
-${LST_D//YEAR_MONTH/${YEAR}_${MONTH}},\
-${LST_N//YEAR_MONTH/${YEAR}_${MONTH}},\
-${NDVI//YEAR_MONTH/${YEAR}_${MONTH}},\
-${NDWI//YEAR_MONTH/${YEAR}_${MONTH}},\
-${DIST_TO_WB//YEAR_MONTH/${YEAR}_${MONTH}}"
-      VARIABLES=ERA5_land_monthly_prectot_sum_30sec_2020_10_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2020_09_01T00_00_00,ERA5_land_monthly_prectot_sum_30sec_2020_08_01T00_00_00,lst_day_monthly_2020_10_1km,lst_night_monthly_2020_10_1km,ndvi_filt_2020_10_01T00_00_00,ndwi_veg_monthly_2020_10_1km
     else
       RASTERS="${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
@@ -127,9 +117,13 @@ ${NDWI//YEAR_MONTH/${YEAR}_${MONTH}}"
     else
       # Note: loop over monthly models, which should be applied
       # (check reasonable models with html output of maxent)
-      # for model version 03:
-      # for MODEL_DATE in "10_2020"; do
-      for MODEL_DATE in "11_2020" "08_2022" "10_2022" "09_2020" "09_2022" "10_2020"; do
+      # NOTE: loop dependent on model version (TODO: add to config?)
+      if [ ${MODEL_V} -eq "03" ]; then
+        MODEL_DATE_RANGE="10_2020"
+      else
+        MODEL_DATE_RANGE="11_2020 08_2022 10_2022 09_2020  09_2022 10_2020"
+      fi
+      for MODEL_DATE in ${MODEL_DATE_RANGE}; do
         r.maxent.predict \
           lambdafile=${OUT_MODEL}/${SPECIES_MAP//MONTH_YEAR/${MODEL_DATE}}.lambdas \
           rasters=${RASTERS} \
