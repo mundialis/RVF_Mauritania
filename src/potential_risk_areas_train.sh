@@ -94,7 +94,7 @@ for VECT_POS in ${LOOP_VECT_LIST} ; do
         # folder for each data version -> create first
         mkdir $(dirname "$SPECIES_OUTPUT") -p
 
-        # TODO: dependet on model version: set input (via config?)
+        # TODO: dependent on model version: set input (via config?)
         # generate SWD files for Maxent
         # for dv01 removed:
         # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},\
