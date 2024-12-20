@@ -9,12 +9,13 @@ export LC_NUMERIC
 # maxent suitability maps)
 # mrt_ppp_2020_1km_Aggregated_UNadj: Estimated total number of people per grid-cell.
 # https://hub.worldpop.org/geodata/summary?id=37504
-HUMAN_POPABS="mrt_ppp_2020_1km_Aggregated_UNadj@WorldPop_Mauritania"
-# TODO: add all livestock together (CTL, GTS, SHP)
-LIVESTOCK_POPDENS="<MAP>@GLW_2020_Mauritania"
+HUMAN_POPABS="mrt_ppp_2020_1km_Aggregated_UNadj_shifted@WorldPop_Mauritania"
+# add all livestock together (CTL, GTS, SHP)
+LIVESTOCK_POPDENS="GLW4-2020.D-DA_livestock_30arcsec@GLW_2020_Mauritania"
 MAXENT_MODEL_VERSION="mv06"
 
 # TODO: set region
+# g.region raster=aoi_buf_rast@RVF_Mauritania -p
 # TODO: use mask?
 
 # number of humans and livestock at risk per pixel
@@ -44,11 +45,20 @@ TOTAL_LOG_L_PROP_MIN=0.0
 TOTAL_LOG_L_PROP_MAX=0.0
 FIRST=1
 
+g.message "natural logs ..."
 for YEAR in `seq 2019 2023` ; do
-  for MONTH in `seq 1 12` ; do
+  FIRSTMONTH=1
+  LASTMONTH=12
+  if [ $YEAR -eq 2019 ] ; then
+    FIRSTMONTH=3
+  fi
+  
+  for MONTH in `seq $FIRSTMONTH $LASTMONTH` ; do
     MONTH2D=`printf "%02d\n" $MONTH`
 
-    MAXENT_SUITABILITY="model_${MONTH2D}_${YEAR}_${MAXENT_MODEL_VERSION}"
+    g.message "$YEAR $MONTH2D ..."
+
+    MAXENT_SUITABILITY="model_${MONTH2D}_${YEAR}_${MAXENT_MODEL_VERSION}@RVF_Mauritania_potential_risk_areas"
 
     # absolute number of humans at risk
     r.mapcalc "human_abs_risk_${YEAR}${MONTH2D} = $HUMAN_POPABS * $MAXENT_SUITABILITY" || exit 1
@@ -63,12 +73,12 @@ for YEAR in `seq 2019 2023` ; do
     # proportion of livestock at risk: MAXENT_SUITABILITY
 
     # natural log of humans at risk
-    r.mapcalc "human_abs_risk_log_${YEAR}${MONTH2D} = log(human_abs_risk_${YEAR}${MONTH2D})" || exit 1
-    r.mapcalc "human_prop_risk_log_${YEAR}${MONTH2D} = log($MAXENT_SUITABILITY)" || exit 1
+    r.mapcalc "human_abs_risk_log_${YEAR}${MONTH2D} = log(if(human_abs_risk_${YEAR}${MONTH2D} == 0, 0.0001, human_abs_risk_${YEAR}${MONTH2D}))" || exit 1
+    r.mapcalc "human_prop_risk_log_${YEAR}${MONTH2D} = log(if($MAXENT_SUITABILITY == 0, 0.0001, $MAXENT_SUITABILITY))" || exit 1
 
     # natural log of livestock at risk
-    r.mapcalc "livestock_abs_risk_log_${YEAR}${MONTH2D} = log(livestock_abs_risk_${YEAR}${MONTH2D})" || exit 1
-    r.mapcalc "livestock_prop_risk_log_${YEAR}${MONTH2D} = log($MAXENT_SUITABILITY)" || exit 1
+    r.mapcalc "livestock_abs_risk_log_${YEAR}${MONTH2D} = log(if(livestock_abs_risk_${YEAR}${MONTH2D} == 0, 0.0001, livestock_abs_risk_${YEAR}${MONTH2D}))" || exit 1
+    r.mapcalc "livestock_prop_risk_log_${YEAR}${MONTH2D} = log(if($MAXENT_SUITABILITY == 0, 0.0001, $MAXENT_SUITABILITY))" || exit 1
 
     # minimum and maximum of these 4 logs across all pixels, months, and years
     if [ $FIRST -eq 1 ] ; then
@@ -110,9 +120,18 @@ for YEAR in `seq 2019 2023` ; do
 done
 
 # scale the log maps to be between 0 and 10 using the overall minima and maxima
+g.message "rescale log maps ..."
 for YEAR in `seq 2019 2023` ; do
-  for MONTH in `seq 1 12` ; do
+  FIRSTMONTH=1
+  LASTMONTH=12
+  if [ $YEAR -eq 2019 ] ; then
+    FIRSTMONTH=3
+  fi
+  
+  for MONTH in `seq $FIRSTMONTH $LASTMONTH` ; do
     MONTH2D=`printf "%02d\n" $MONTH`
+
+    g.message "$YEAR $MONTH2D ..."
 
     MAXENT_SUITABILITY="model_${MONTH2D}_${YEAR}_${MAXENT_MODEL_VERSION}"
 
@@ -158,19 +177,32 @@ ${percentile_40}:${percentile_60}:3
 ${percentile_60}:${percentile_80}:4
 ${percentile_80}:10:5" >$RULESFILE
 
-
 # assign coded quintile to each pixel according to the quintile its value falls into
+g.message "recode spillover to quintiles ..."
 for YEAR in `seq 2019 2023` ; do
-  for MONTH in `seq 1 12` ; do
+  FIRSTMONTH=1
+  LASTMONTH=12
+  if [ $YEAR -eq 2019 ] ; then
+    FIRSTMONTH=3
+  fi
+  
+  for MONTH in `seq $FIRSTMONTH $LASTMONTH` ; do
     MONTH2D=`printf "%02d\n" $MONTH`
+
+    g.message "$YEAR $MONTH2D ..."
+
     # TODO: loop over all monthly maps and recode (with copy)
     r.recode input=spillover_geomean_${YEAR}${MONTH2D} output=spillover_quintile_${YEAR}${MONTH2D} rules=$RULESFILE || exit 1
   done
 done
 
 # average quintile for each pixel and month across all years
+g.message "average quintile per month over all years ..."
 for MONTH in `seq 1 12` ; do
   MONTH2D=`printf "%02d\n" $MONTH`
+
+  g.message "$MONTH2D ..."
+
   # all maps over all years for this month: average quintile:
   # synoptic spillover potential for each pixel and month across all years
   MAPLIST=`g.list rast mapset=. pattern=spillover_quintile_????${MONTH2D} separator=comma`
