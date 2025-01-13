@@ -1,5 +1,25 @@
 #!/bin/bash
 
+############################################################################
+#
+# MODULE:      spillover_risk.sh
+# AUTHOR(S):   Markus Metz
+#
+# PURPOSE:     RVF spillover risk calculation after Hardcastle et al. 2020
+# COPYRIGHT:   (C) 2024 by mundialis GmbH & Co. KG
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+#############################################################################
+
 # setting environment, so that awk works properly in all languages
 unset LC_ALL
 LC_NUMERIC=C
