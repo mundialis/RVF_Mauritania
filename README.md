@@ -78,3 +78,17 @@ Notes:
 - Best results so far:
   - "Best" means: model is not mainly driven by single Covariate + application to 2020 looks reasonable (no strong risk change "borders", geometric features/artefacts (?), ...)
   - **mv03** or **mv06** (but differences between them; mv06 eventually more reliable, cause more data used for training, compared to mv03)
+
+## spillover risk calculation
+The spillover risk calculation follows [Hardcastle et al. 2020](https://doi.org/10.1016/j.ijid.2020.07.043) with two differences:
+- the geographic units are not administrative areas but pixels
+- livestock movement from [Jahel et al. 2020](https://doi.org/10.1038/s41598-020-65132-8) is included
+
+The main script is [spillover_risk_log_1plusx_movement.sh.sh](src/spillover_risk_log_1plusx_movement.sh) which includes livestock movement:
+the number of animals per pixel is increased with increasing movement through a pixel to simulate more contacts between animals.
+
+Input data for the spillover risk calculation are
+- potential risk calculated with maxent for each month separately (see above)
+- human population per pixel
+- livestock population per pixel
+- livestock movement, separately for the dry and wet season
