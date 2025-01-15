@@ -56,7 +56,8 @@ FILE_FORM="tif"
 # - 300 – 600 dpi
 # File size:
 # - <10 MB
-# TODO: check
+# for 300 dpi: 3315,3520 -> 3315/300*2.54 and 3520/300*2.54 -> 28 cm and 30 cm
+# for 600 dpi: 3315,3520 -> 3315/600*2.54 and 3520/600*2.54 -> 14 cm and 15 cm
 SIZE_WITH_LEG="3315,3520"
 # set differently to remove white border at top (if no title)
 SIZE_WITHOUT_LEG="3315,3275"
@@ -145,8 +146,9 @@ if [[ $DATA == "potential_risk_map" ]]
 then
     # to ensure same color range for all raster maps (from 0 to 1)
     r.colors map=`g.list raster pattern=${DATA}* sep=,` rules=$COL_RULES
+    # for testing only:
     # for RAST in `g.list raster pattern=${DATA}*2021*01`; do
-    # TODO: for all data
+    # for all data:
     for RAST in `g.list raster pattern=${DATA}*`; do
         # input
         start_image
