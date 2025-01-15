@@ -43,6 +43,31 @@ DATA="potential_risk_map"
 # Options: yes, no
 LEGEND="yes"
 
+# --------- further settings -----------
+
+# Color rules
+# Note: might need to adjust manually, such that range is from 0 to 1 (for legend)
+# r.colors map=<> color=bcyr
+# r.colors.out map=<> rules=/outpath/rules/bcyr_mod
+# manually adjust min and max value within rules file to e.g. -0.001 and 1.001 (slightly above actual range);
+# and event. also remaining values, such that colors evenly split
+# r.colors map=<> rules=/outpath/rules/bcyr_mod
+COL_RULES=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/paper/figures/bcyr
+
+# Admin. boundary of Mauritania
+AREA_FILE=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/MRT_admin_2.geojson
+# Background data of surrounding countries
+# BACKGROUNDAREA_FILE=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/osm_boundary_administrative_admin_level_4_area_around_mauretania.gpkg
+BACKGROUNDAREA_FILE=/home/lkrisztian/data/mood/osm_boundary_administrative_admin_level_4_area_around_mauretania.gpkg
+
+# position of legend and title
+LEG_POS="20,75,2.5,6"
+TITL_POS="35,96"
+
+# Import vector areas
+# - Options: false, true
+IMPORT_AREA=false
+
 # --------- PLOS Journal requirements -----------
 
 # File format:
@@ -73,31 +98,6 @@ TITL_SIZE=4
 # Figure Files:
 # Fig1.tif, Fig2.eps, and so on. Match file name to caption label and citation.
 # TODO at the end?
-
-# --------- further settings -----------
-
-# Color rules
-# Note: might need to adjust manually, such that range is from 0 to 1 (for legend)
-# r.colors map=<> color=bcyr
-# r.colors.out map=<> rules=/outpath/rules/bcyr_mod
-# manually adjust min and max value within rules file to e.g. -0.001 and 1.001 (slightly above actual range);
-# and event. also remaining values, such that colors evenly split
-# r.colors map=<> rules=/outpath/rules/bcyr_mod
-COL_RULES=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/paper/figures/bcyr
-
-# Admin. boundary of Mauritania
-AREA_FILE=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/MRT_admin_2.geojson
-# Background data of surrounding countries
-# BACKGROUNDAREA_FILE=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/osm_boundary_administrative_admin_level_4_area_around_mauretania.gpkg
-BACKGROUNDAREA_FILE=/home/lkrisztian/data/mood/osm_boundary_administrative_admin_level_4_area_around_mauretania.gpkg
-
-# position of legend and title
-LEG_POS="20,75,2.5,6"
-TITL_POS="35,96"
-
-# Import vector areas 
-# - Options: false, true
-IMPORT_AREA=false
 
 
 #################
