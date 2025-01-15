@@ -61,7 +61,7 @@ AREA_FILE=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/MRT_admin_2.geojson
 BACKGROUNDAREA_FILE=/home/lkrisztian/data/mood/osm_boundary_administrative_admin_level_4_area_around_mauretania.gpkg
 
 # position of legend and title
-LEG_POS="20,75,2.5,6"
+LEG_POS="22.4,89,3.1,6.3"
 TITL_POS="35,96"
 
 # Import vector areas
@@ -92,8 +92,8 @@ SIZE_WITHOUT_LEG="3315,3275"
 # fonts not available; sans -> Similar to Arial
 FONT="sans"
 # TODO: check
-FONT_SIZE=80
-TITL_SIZE=4
+FONT_SIZE=100 #80
+TITL_SIZE=6 #4
 
 # Figure Files:
 # Fig1.tif, Fig2.eps, and so on. Match file name to caption label and citation.
@@ -147,7 +147,7 @@ then
     # to ensure same color range for all raster maps (from 0 to 1)
     r.colors map=`g.list raster pattern=${DATA}* sep=,` rules=$COL_RULES
     # for testing only:
-    # for RAST in `g.list raster pattern=${DATA}*2021*01`; do
+    # for RAST in `g.list raster pattern=${DATA}*2019*03`; do
     # for all data:
     for RAST in `g.list raster pattern=${DATA}*`; do
         # input
