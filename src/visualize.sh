@@ -22,7 +22,7 @@
 ############################################################################
 
 # Call script:
-#  grass -c epsg:25832 /path/to/grassdb --exec bash images.sh
+#  grass -c epsg:25832 /path/to/grassdb --exec bash visualize.sh
 
 # Parameter
 # Admin. boundary of Mauritania
