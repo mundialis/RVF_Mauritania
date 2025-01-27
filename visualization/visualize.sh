@@ -36,6 +36,7 @@ OUT_BASEDIR=/home/lkrisztian/data/mood/rvf_mauritania/paper_plots/
 # -- Which raster to plot
 # Options:
 # - potential_risk_map -> Expects mapset with rasters <potential_risk_map*>
+#   e.g. import all from from /mnt/projects/mood/RVF_Mauritania/results/model_mv06/geotiff/
 DATA="potential_risk_map"
 
 # -- legends (including title)
