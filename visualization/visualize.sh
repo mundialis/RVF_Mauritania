@@ -5,7 +5,7 @@
 # MODULE:      visualize.sh
 # AUTHOR(S):   Lina Krisztian
 #
-# PURPOSE:     Create images for GRASS raster output: risk maps
+# PURPOSE:     Create images for GRASS raster output: risk maps or spillover
 # COPYRIGHT:   (C) 2025 by mundialis GmbH & Co. KG and the GRASS
 #              Development Team
 #
@@ -30,25 +30,49 @@
 
 # --------- main settings -----------
 
-# -- Output directory
+# -- Output base directory
 OUT_BASEDIR=/home/lkrisztian/data/mood/rvf_mauritania/paper_plots/
 
 # -- Which raster to plot
 # Options:
-# - potential_risk_map -> Expects mapset with rasters <potential_risk_map*>
-#   e.g. import all from from /mnt/projects/mood/RVF_Mauritania/results/model_mv06/geotiff/
-DATA="potential_risk_map"
+# - "potential_risk_map"
+#   -> Expects mapset with year-month rasters <potential_risk_map*>
+#   e.g. import all from /mnt/projects/mood/RVF_Mauritania/results/potential_risk_maps/model_mv06/geotiff/
+# - "spillover"
+#   -> Expects mapset with year-month (spillover_quintile_YYYYMM)
+#      and monthly aggregated (<spillover_quintile_month_MM>) rasters
+#   e.g. import all from /mnt/projects/mood/RVF_Mauritania/results/spillover/
+# DATA="potential_risk_map"
+DATA="spillover"
 
 # -- legends (including title)
 # Options: yes, no
 LEGEND="yes"
 
-# -- aggregation to monthyl maps
-# NOTE: only for potential risk maps
+# -- aggregation to monthly maps
 # Options: yes, no
 MONTH_AGG="yes"
 
 # --------- further settings -----------
+
+# Admin. boundary of Mauritania
+AREA_FILE=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/MRT_admin_2.geojson
+# Background data of surrounding countries
+# BACKGROUNDAREA_FILE=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/osm_boundary_administrative_admin_level_4_area_around_mauretania.gpkg
+BACKGROUNDAREA_FILE=/home/lkrisztian/data/mood/osm_boundary_administrative_admin_level_4_area_around_mauretania.gpkg
+
+# Color rules/map
+if [[ $DATA == "potential_risk_map" ]]; then
+    # Note: might need to adjust manually, such that range is from 0 to 1 (for legend)
+    # r.colors map=<> color=bcyr
+    # r.colors.out map=<> rules=/outpath/rules/bcyr_mod
+    # manually adjust min and max value within rules file to e.g. -0.001 and 1.001 (slightly above actual range);
+    # and event. also remaining values, such that colors evenly split
+    # r.colors map=<> rules=/outpath/rules/bcyr_mod
+    COL_RULES=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/paper/figures/bcyr
+else
+    COL_RULES="bcyr"
+fi
 
 # Define sub-directory for output, depending on settings
 if [[ $LEGEND == "yes" ]]; then
@@ -61,32 +85,23 @@ if [[ $MONTH_AGG == "yes" ]]; then
 fi
 OUT_DIR=${OUT_BASEDIR}/${DATA}/${OUT_SUBDIR}
 
-# Color rules
-# Note: might need to adjust manually, such that range is from 0 to 1 (for legend)
-# r.colors map=<> color=bcyr
-# r.colors.out map=<> rules=/outpath/rules/bcyr_mod
-# manually adjust min and max value within rules file to e.g. -0.001 and 1.001 (slightly above actual range);
-# and event. also remaining values, such that colors evenly split
-# r.colors map=<> rules=/outpath/rules/bcyr_mod
-COL_RULES=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/paper/figures/bcyr
-
-# Admin. boundary of Mauritania
-AREA_FILE=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/MRT_admin_2.geojson
-# Background data of surrounding countries
-# BACKGROUNDAREA_FILE=/mnt/mycephfs_ro/projects/mood/RVF_Mauritania/osm_boundary_administrative_admin_level_4_area_around_mauretania.gpkg
-BACKGROUNDAREA_FILE=/home/lkrisztian/data/mood/osm_boundary_administrative_admin_level_4_area_around_mauretania.gpkg
-
 # position of legend and title
 LEG_POS="22.4,89,3.1,6.3"
 if [[ $DATA == "potential_risk_map" ]] && [[ $MONTH_AGG == "no" ]]; then
     TITL_POS="23,96"
 elif [[ $DATA == "potential_risk_map" ]] && [[ $MONTH_AGG == "yes" ]]; then
     TITL_POS="8.5,96"
+elif [[ $DATA == "spillover" ]] && [[ $MONTH_AGG == "yes" ]]; then
+    TITL_POS="8.5,96"
 fi
-
-# Import vector areas
-# - Options: false, true
-IMPORT_AREA=false
+# further label settings
+if [[ $DATA == "potential_risk_map" ]]; then
+    LABELSTEP=0.1
+    LABELRANGE="0,1"
+elif [[ $DATA == "spillover" ]]; then
+    LABELSTEP=1.0
+    LABELRANGE="1,5"
+fi
 
 # --------- PLOS Journal requirements -----------
 
@@ -150,8 +165,8 @@ add_map () {
     d.rast map=$RAST
     if [[ $LEGEND == "yes" ]]; then
         g.region w=w-2.5
-        d.legend raster=$RAST label_step=0.1 \
-            title="${LEGEND_TITLE}" bgcolor=255:255:204 border_color=gray -b -t range=0,1 at=${LEG_POS} fontsize=${FONT_SIZE} font=${FONT}
+        d.legend raster=$RAST label_step=${LABELSTEP} \
+            title="${LEGEND_TITLE}" bgcolor=255:255:204 border_color=gray -b -t range="${LABELRANGE}" at=${LEG_POS} fontsize=${FONT_SIZE} font=${FONT}
     fi
     # Adming. boundaries of Mauretania
     d.vect map=area fill_color=none color=0:0:0 width=2.0
@@ -192,7 +207,7 @@ month_num2str () {
 ### PROCESSING ###
 ##################
 
-# check if output dir empty, exit if not
+# Check if output dir empty, exit if not
 if [ -d "$OUT_DIR" ]; then
     if find ${OUT_DIR} -mindepth 1 -maxdepth 1 | read; then
         echo "ERROR: $OUT_DIR is not empty. Delete folder content first, or define different folder."
@@ -200,25 +215,28 @@ if [ -d "$OUT_DIR" ]; then
     fi
 fi
 
-# import area and set region
-if [ "$IMPORT_AREA" = true ]
+# Import area and set region
+if [ `g.list vect pattern='area'` ]
 then
+    echo "Vector map <area> already imported, skipping..."
+else
     v.import input=${AREA_FILE} output=area
-    v.import input=${BACKGROUNDAREA_FILE} output=area_background --o
+fi
+if [ `g.list vect pattern='area_background'` ]
+then
+    echo "Vector map <area_background> already imported, skipping..."
+else
+    v.import input=${BACKGROUNDAREA_FILE} output=area_background
 fi
 
-
+# Raster maps
 if [[ $DATA == "potential_risk_map" ]]
 then
-    # to ensure same color range for all raster maps (from 0 to 1)
     if [[ $MONTH_AGG == "no" ]]
     then 
+        # To ensure same color range for all raster maps (from 0 to 1)
         r.colors map=`g.list raster pattern=${DATA}* exclude=*agg* sep=,` rules=$COL_RULES
-        # for testing only:
-        # for RAST in `g.list raster pattern=${DATA}*2019*03`; do
-        # for all data:
         for RAST in `g.list raster pattern=${DATA}* exclude=*agg*`; do
-            # input
             start_image
             LEGEND_TITLE="[%]"
             RASTLIST=(${RAST//_/ })
@@ -241,7 +259,6 @@ then
             # Create maps
             start_image
             LEGEND_TITLE="[%]"
-            RASTLIST=(${RAST//_/ })
             MONTH_STR=`month_num2str "${MONTH}"`
             FIGURE_TITLE="Monthly aggregated probability of risk: ${MONTH_STR}"
             add_map "${RAST_AV_OUT}" "${LEGEND}" "${LEGEND_TITLE}" "${FIGURE_TITLE}"
@@ -249,5 +266,31 @@ then
         done
     else
         echo "Non valid option for <MONTH_AGG>. Allowed: "yes" or "no", but given $MONTH_AGG"
+        exit 1
     fi
+elif [[ $DATA == "spillover" ]]
+then
+    if [[ $MONTH_AGG == "no" ]]
+    then
+        echo "NOTE: Not yet implemented: <DATA>=$DATA and <MONTH_AGG>=$MONTH_AGG"
+    elif [[ $MONTH_AGG == "yes" ]]
+    then
+        # to ensure same color range for all raster maps (from 0 to 1)
+        r.colors map=`g.list raster pattern=${DATA}*_month* sep=,` color=$COL_RULES
+        for RAST in `g.list raster pattern=${DATA}*_month*`; do
+            start_image
+            LEGEND_TITLE=" "
+            RASTLIST=(${RAST//_/ })
+            MONTH_STR=`month_num2str "${RASTLIST[-1]}"`
+            FIGURE_TITLE="Monthly quintiles of spillover potential: ${MONTH_STR}"
+            add_map "${RAST}" "${LEGEND}" "${LEGEND_TITLE}" "${FIGURE_TITLE}"
+            image_settings_and_export
+        done
+    else
+        echo "Non valid option for <MONTH_AGG>. Allowed: "yes" or "no", but given $MONTH_AGG"
+        exit 1
+    fi
+else
+    echo "Non valid option for <DATA>. Allowed: "potential_risk_map" or "spillover", but given $DATA"
+    exit 1
 fi
