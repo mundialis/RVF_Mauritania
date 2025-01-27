@@ -31,7 +31,7 @@ export LC_NUMERIC
 # https://hub.worldpop.org/geodata/summary?id=37504
 HUMAN_POPABS="mrt_ppp_2020_1km_Aggregated_UNadj_shifted@WorldPop_Mauritania"
 # add all livestock together (CTL, GTS, SHP)
-LIVESTOCK_POPDENS="GLW4-2020.D-DA_livestock_30arcsec@GLW_2020_Mauritania"
+LIVESTOCK_POPDENS="GLW4-2020.D-DA_livestock_zero_30arcsec@GLW_2020_Mauritania"
 MAXENT_MODEL_VERSION="mv06"
 
 # set region
