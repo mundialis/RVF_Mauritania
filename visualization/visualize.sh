@@ -175,7 +175,7 @@ image_settings_and_export () {
     fi
 
     d.out.file size=${SIZE} output=${OUT_DIR}/${RAST}.${FILE_FORM} format=$FILE_FORM --o
-    echo "Created <${OUT_DIR}/${RAST}.png>"
+    echo "Created <${OUT_DIR}/${RAST}.${FILE_FORM}>"
     sleep 5
     d.mon stop=wx0
 }
