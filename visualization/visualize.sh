@@ -228,6 +228,7 @@ then
 else
     v.import input=${BACKGROUNDAREA_FILE} output=area_background
 fi
+g.region vector=area
 
 # Raster maps
 if [[ $DATA == "potential_risk_map" ]]
