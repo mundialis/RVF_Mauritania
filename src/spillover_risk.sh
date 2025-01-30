@@ -50,7 +50,7 @@ r.mapcalc "livestock_pop_abs = \"${LIVESTOCK_POPDENS}\" * area() / 1000000.0"
 
 # loop over all years and months
 
-# intitialize overall minima and maxima for
+# initialize overall minima and maxima for
 # log of absolute number of humans at risk
 # log of proportion of humans at risk
 # log of absolute number of livestock at risk
@@ -255,3 +255,5 @@ for MONTH in `seq 1 12` ; do
   MAPLIST=`g.list rast mapset=. pattern=spillover_geomean_????${MONTH2D} separator=comma`
   r.series input=$MAPLIST method=average output=spillover_geomean_month_${MONTH2D} || exit 1
 done
+
+exit 0
