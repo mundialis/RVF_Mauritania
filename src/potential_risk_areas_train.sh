@@ -6,7 +6,7 @@
 # AUTHOR(S):   Victoria-Leandra Brunn, Lina Krisztian
 #
 # PURPOSE:     Processing script for preparation and training of Maxent model
-# COPYRIGHT:   (C) 2024 by mundialis GmbH & Co. KG
+# COPYRIGHT:   (C) 2024 - 2025 by mundialis GmbH & Co. KG
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -52,8 +52,8 @@ r.mask raster=aoi_buf_rast@RVF_Mauritania
 # Helper variable, for information about loop iteration
 ITER=0
 
-# TODO: give month which should be used explicit within config (not indirect via model version)
 # Set selection of used disease data for modeling
+# TODO: give month which should be used explicit within config (not indirect via model version)
 if [ ${MODEL_V} -eq "03" ]; then
     # loop / use only 10-2020 (model version 03)
     LOOP_VECT_LIST=`g.list vector pattern=${SPECIES_MAP//MONTH_YEAR/10_2020} mapset=${DISEASE_MAPSET}`
@@ -77,7 +77,7 @@ for VECT_POS in ${LOOP_VECT_LIST} ; do
         ITER=$((${ITER}+1))
 
         # get date from current disease vector data name
-        # z.B. VECT_POS=rvf_compiled_dataset_01_2020_POS
+        # e.g. VECT_POS=rvf_compiled_dataset_01_2020_POS
         DATE_SPLIT=(${VECT_POS//_/ })
         MONTH=${DATE_SPLIT[3]}
         YEAR=${DATE_SPLIT[4]}
@@ -94,8 +94,8 @@ for VECT_POS in ${LOOP_VECT_LIST} ; do
         # folder for each data version -> create first
         mkdir $(dirname "$SPECIES_OUTPUT") -p
 
-        # TODO: dependent on model version: set input (via config?)
         # generate SWD files for Maxent
+        # NOTE: input dependent on model version, TODO: set input via config?
         # for dv01 removed:
         # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},\
         # for dv02 removed:
@@ -117,7 +117,7 @@ ${NDWI//YEAR_MONTH/${YEAR}_${MONTH}}\
                 bgr_output=${BGR_OUTPUT//MONTH_YEAR/${MONTH}_${YEAR}} --o
         fi
 
-        # Concat monthly SWD files to single combined and metadata file with corresponding dates
+        # Concat monthly SWD files to single combined file and metadata file with corresponding dates
         if [ ${ITER} -eq 1 ]; then
             if [ ${SING_MOD} -eq 1 ]; then
                 SPECIES_OUTPUT_COMB=${SPECIES_OUTPUT_COMB}_single_model
@@ -139,8 +139,8 @@ done
 
 if [ ${SING_MOD} -eq 1 ]; then
     # replace month-year specifics of species name within SWD files
-    # otherwise one model per species trained/returned
-    # -> here we want one single, trained with all month-year data combined
+    # otherwise one model per species trained/returned, however here we want 
+    # one single model, trained with all month-year data combined
     for DATE in `tail -n +3 ${DISEASE_COMB_DATES}` ; do
         DATE_SPLIT=(${DATE//-/ });
         STR="${DATE_SPLIT[1]}_${DATE_SPLIT[0]}";
@@ -161,9 +161,10 @@ r.maxent.train -g -j \
     outputdirectory=${OUT_MODEL} ${flags} --o
     # - flags:
     # d flag: keep duplicates
-    # n flag: avoid adding more data to background samples --> when set, model seems NOT having enough data for reasonable training
+    # n flag: avoid adding more data to background samples
+    #  --> when set, it seems that model DOES NOT have enough data for reasonable training
     # - for test set:
     # randomtestpoints=15 OR
     # testsamplesfile=...
     # - for creation of prediction of given input sample and background vector points:
-    # flag y and b + name via option <samplepredictions> and <backgroundpredictions>
+    # y and b flag + name via option <samplepredictions> and <backgroundpredictions>
