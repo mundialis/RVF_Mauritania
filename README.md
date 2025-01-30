@@ -84,7 +84,7 @@ The spillover risk calculation follows [Hardcastle et al. 2020](https://doi.org/
 - the geographic units are not administrative areas but pixels
 - livestock movement from [Jahel et al. 2020](https://doi.org/10.1038/s41598-020-65132-8) is included
 
-The main script is [spillover_risk_log_1plusx_movement.sh.sh](src/spillover_risk_log_1plusx_movement.sh) which includes livestock movement:
+The main script is [spillover_risk.sh](src/spillover_risk.sh) which includes livestock movement:
 the number of animals per pixel is increased with increasing movement through a pixel to simulate more contacts between animals.
 
 Input data for the spillover risk calculation are
