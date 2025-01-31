@@ -2,11 +2,11 @@
 
 ############################################################################
 #
-# MODULE:      spillover_risk_log1plusx_movement.sh
+# MODULE:      spillover_risk.sh
 # AUTHOR(S):   Markus Metz
 #
 # PURPOSE:     RVF spillover risk calculation after Hardcastle et al. 2020
-# COPYRIGHT:   (C) 2024 by mundialis GmbH & Co. KG
+# COPYRIGHT:   (C) 2024 - 2025 by mundialis GmbH & Co. KG
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,10 @@
 #
 #############################################################################
 
+# ---------------------
+# CONFIGURATION
+# ---------------------
+
 # setting environment, so that awk works properly in all languages
 unset LC_ALL
 LC_NUMERIC=C
@@ -27,28 +31,35 @@ export LC_NUMERIC
 
 # set variables (map names for human population, livestock population and
 # maxent suitability maps)
+
 # mrt_ppp_2020_1km_Aggregated_UNadj: Estimated total number of people per grid-cell.
 # https://hub.worldpop.org/geodata/summary?id=37504
 HUMAN_POPABS="mrt_ppp_2020_1km_Aggregated_UNadj_shifted@WorldPop_Mauritania"
-# add all livestock together (CTL, GTS, SHP)
+# all livestock added together (CTL, GTS, SHP)
 LIVESTOCK_POPDENS="GLW4-2020.D-DA_livestock_zero_30arcsec@GLW_2020_Mauritania"
 MAXENT_MODEL_VERSION="mv06"
 
-# set region
-g.region raster=aoi_buf_rast@RVF_Mauritania -p
-# TODO: use mask?
+REGION="aoi_buf_rast@RVF_Mauritania"
 
-# number of humans and livestock at risk per pixel
+
+# ---------------------
+# PROCESSING
+# ---------------------
+
+# set region
+g.region raster=${REGION} -p
+
+# -- number of humans and livestock at risk per pixel
 
 # optional preparation if needed:
 # convert human population density (number / km2) to absolute number of people
-#r.mapcalc "human_pop_abs = $HUMAN_POPDENS * area() / 1000000.0"
+# r.mapcalc "human_pop_abs = $HUMAN_POPDENS * area() / 1000000.0"
 
 # convert livestock population density (number / km2) to absolute number of livestock
 r.mapcalc "livestock_pop_abs = \"${LIVESTOCK_POPDENS}\" * area() / 1000000.0"
 
 
-# loop over all years and months
+# -- calculate natural log: loop over all years and months
 
 # initialize overall minima and maxima for
 # log of absolute number of humans at risk
@@ -98,7 +109,7 @@ for YEAR in `seq 2019 2023` ; do
     if [ $MONTH -eq 6 ] || [ $MONTH -eq 7 ] || [ $MONTH -eq 8 ] || [ $MONTH -eq 9 ] || [ $MONTH -eq 10 ] ; then
       MOVEMENTMAP="Current_wet_1km_nodata_scaled2@livestock_movement_Mauritania"
     fi
-    # modified number of livestock: more movement, more animals
+    # modified number of livestock: more movement -> more animals
     r.mapcalc "livestock_abs_move_${YEAR}${MONTH2D} = livestock_pop_abs * (1 + $MOVEMENTMAP)" || exit 1
 
     # absolute number of livestock at risk
@@ -153,7 +164,8 @@ for YEAR in `seq 2019 2023` ; do
   done
 done
 
-# scale the log maps to be between 0 and 10 using the overall minima and maxima
+# -- scale the log maps to be between 0 and 10 using the overall minima and maxima
+#    and calculate geometric mean
 g.message "rescale log maps ..."
 for YEAR in `seq 2019 2023` ; do
   FIRSTMONTH=1
@@ -195,7 +207,7 @@ for YEAR in `seq 2019 2023` ; do
   done
 done
 
-# quintile ranking for each spillover value from all geographic units (pixels), months, and years, excluding 0 cells
+# -- quintile ranking for each spillover value from all geographic units (pixels), months, and years, excluding 0 cells
 # r.univar with all spillover_geomean_* maps
 # the commandline must not become too long !
 MAPLIST=`g.list rast mapset=. pattern=spillover_geomean_nozero_* separator=comma`
@@ -204,7 +216,6 @@ eval `r.univar -ge map=$MAPLIST percentile=20,40,60,80`
 RULESFILE=`g.tempfile pid=$$`
 
 # write rules for r.recode to file
-
 echo "0:${percentile_20}:1
 ${percentile_20}:${percentile_40}:2
 ${percentile_40}:${percentile_60}:3
@@ -213,7 +224,7 @@ ${percentile_80}:10:5" >$RULESFILE
 
 # assign coded quintile to each pixel according to the quintile its value falls into
 # loop over all monthly maps and recode (with copy)
-g.message "recode spillover to quintiles ..."
+g.message "Recode spillover to quintiles ..."
 for YEAR in `seq 2019 2023` ; do
   FIRSTMONTH=1
   LASTMONTH=12

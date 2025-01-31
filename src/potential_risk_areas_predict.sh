@@ -6,7 +6,7 @@
 # AUTHOR(S):   Victoria-Leandra Brunn, Lina Krisztian
 #
 # PURPOSE:     Processing script for prediction of Maxent model
-# COPYRIGHT:   (C) 2024 by mundialis GmbH & Co. KG
+# COPYRIGHT:   (C) 2024 - 2025 by mundialis GmbH & Co. KG
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -80,14 +80,8 @@ while [ "$DATE_TMP" != ${STOPDATE} ]; do
     DATE_2_PRIOR=$(date -I -d "$DATE_TMP - 2 month"); DATE_SPLIT=(${DATE_2_PRIOR//-/ });
     TMP_YEAR=${DATE_SPLIT[0]}; TMP_MONTH=${DATE_SPLIT[1]}; 
 
-    # (TODO: only if water bodies or distance to water bodies used)
-    # for dist to water bodies: data for 2023-04 are missing, since they are not available from CLMS
-    # -> e.g. use previous month in this case
-
     # apply model
     # TODO: give covariates which should be used explicit within config (not indirect via model version)
-    # Note: removed:
-    # - soil moisture: ${SM//YEAR_MONTH/${YEAR}_${MONTH}},
     if [ ${MODEL_V} -eq "01" ] || [ ${MODEL_V} -eq "02" ]; then
       RASTERS="${PREC_CURR//YEAR_MONTH/${YEAR}_${MONTH}},\
 ${PREC_1M//YEAR_MONTH/${OMP_YEAR}_${OMP_MONTH}},\
@@ -115,7 +109,7 @@ ${NDWI//YEAR_MONTH/${YEAR}_${MONTH}}"
           variables=${VARIABLES} \
           output=model_${MONTH}_${YEAR}_mv${MODEL_V} --o --v
     else
-      # Note: loop over monthly models, which should be applied
+      # loop over monthly models, which should be applied
       # (check reasonable models with html output of maxent)
       # NOTE: loop dependent on model version (TODO: add to config?)
       if [ ${MODEL_V} -eq "03" ]; then
