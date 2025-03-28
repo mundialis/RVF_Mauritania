@@ -1,6 +1,5 @@
 |Model version | Used data version | Training presence samples | Training all samples (background and presence) | Description | Notes |
 | - | - | - | - | - | - |
-| - | - | 53/46 | 187/182 | not versioned; first tests with October 2020 model; <br/> results within `model_10_2020` and with test data split `model_10_2020_with_testdata`| |
 | 01 | 01 | 152 | 752 | single model with all disease data combined | variable contribution: ca. 70 % impact of current precipitation |
 | 02 | 01 | dependent on month | dependent on month | monthly models (for each month with at least one single positive sample) | for monthly models very different results when applying model + within variable contribution; mostly precipitation driving factor of model |
 | 03 | 02 | 53 | 187| monthly model, only for October 2020 | variable contribution: roughly 40 % for 2 month prior and 40 % for 1 month prior precipitation |
